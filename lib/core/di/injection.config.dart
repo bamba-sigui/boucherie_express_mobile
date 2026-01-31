@@ -57,6 +57,7 @@ import '../../features/onboarding/domain/usecases/complete_onboarding.dart'
     as _i561;
 import '../../features/onboarding/presentation/bloc/onboarding_bloc.dart'
     as _i792;
+import '../../features/onboarding/presentation/bloc/splash_bloc.dart' as _i302;
 import '../../features/orders/data/datasources/order_remote_datasource.dart'
     as _i1007;
 import '../../features/orders/data/repositories/order_repository_impl.dart'
@@ -190,6 +191,10 @@ extension GetItInjectableX on _i174.GetIt {
           getCurrentUser: gh<_i111.GetCurrentUser>(),
           updateUserProfile: gh<_i901.UpdateUserProfile>(),
           signOut: gh<_i568.SignOut>(),
+        ));
+    gh.factory<_i302.SplashBloc>(() => _i302.SplashBloc(
+          checkOnboardingStatus: gh<_i474.CheckOnboardingStatus>(),
+          getCurrentUser: gh<_i111.GetCurrentUser>(),
         ));
     gh.factory<_i797.AuthBloc>(() => _i797.AuthBloc(
           gh<_i485.SignInWithEmail>(),

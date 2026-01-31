@@ -10,141 +10,164 @@ class OnboardingPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          // Image with badge
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Glow effect
-                Container(
-                  width: 340,
-                  height: 340,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        AppColors.primary.withOpacity(0.05),
-                        Colors.transparent,
-                      ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Spacer(flex: 1),
+
+        // Image with badge in rounded container
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // White/light gray rounded container
+              Container(
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height * 0.4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: CachedNetworkImage(
+                    imageUrl: page.imageUrl,
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) => Container(
+                      color: const Color(0xFFF5F5F5),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: const Color(0xFFF5F5F5),
+                      child: const Icon(
+                        Icons.restaurant,
+                        color: AppColors.textGrey,
+                        size: 80,
+                      ),
                     ),
                   ),
                 ),
+              ),
 
-                // Product image
-                Container(
-                  width: 340,
-                  height: 340,
+              // Badge "100% FRAIS"
+              Positioned(
+                bottom: -20,
+                right: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 13,
+                    vertical: 13,
+                  ),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(100),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
+                        color: AppColors.primary.withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: CachedNetworkImage(
-                      imageUrl: page.imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: AppColors.cardDark,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
-                        ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.verified,
+                        color: AppColors.backgroundDark,
+                        size: 20,
                       ),
-                      errorWidget: (context, url, error) => Container(
-                        color: AppColors.cardDark,
-                        child: const Icon(
-                          Icons.image_not_supported,
-                          color: AppColors.textGrey,
-                          size: 64,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Badge
-                Positioned(
-                  bottom: -16,
-                  right: -16,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        const Icon(
-                          Icons.verified,
+                      const SizedBox(width: 8),
+                      Text(
+                        page.badgeText,
+                        style: const TextStyle(
                           color: AppColors.backgroundDark,
-                          size: 24,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          page.badgeText,
-                          style: const TextStyle(
-                            color: AppColors.backgroundDark,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 48),
+
+        // Title with mixed colors
+        Padding(
+          padding: const EdgeInsets.symmetric( horizontal: 32),
+          child: RichText(
+            textAlign: TextAlign.start,
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                height: 1.2,
+              ),
+              children: _buildTitleSpans(page.title),
             ),
           ),
+        ),
 
-          const SizedBox(height: 48),
+        const SizedBox(height: 20),
 
-          // Title
-          Text(
-            page.title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-              height: 1.1,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Description
-          Text(
+        // Description
+        Padding(
+          padding: const EdgeInsets.symmetric( horizontal: 32),
+          child: Text(
             page.description,
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.start,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 18,
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 16,
               height: 1.5,
             ),
           ),
+        ),
 
-          const SizedBox(height: 32),
-        ],
-      ),
+        const Spacer(flex: 2),
+      ],
     );
+  }
+
+  /// Parse title to highlight green words
+  List<TextSpan> _buildTitleSpans(String title) {
+    final List<TextSpan> spans = [];
+    final lines = title.split('\n');
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i];
+
+      // Check if line should be green (contains specific keywords)
+      final isGreen =
+          line.toLowerCase().contains('livrée chez vous') ||
+          line.toLowerCase().contains('recevez rapidement') ||
+          line.toLowerCase().contains('garantie') ||
+          line.toLowerCase().contains('sécurisé');
+
+      spans.add(
+        TextSpan(
+          text: line,
+          style: TextStyle(color: isGreen ? AppColors.primary : Colors.white),
+        ),
+      );
+
+      // Add line break if not last line
+      if (i < lines.length - 1) {
+        spans.add(const TextSpan(text: '\n'));
+      }
+    }
+
+    return spans;
   }
 }

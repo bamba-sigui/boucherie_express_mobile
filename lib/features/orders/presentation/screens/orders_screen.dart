@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/format_utils.dart';
 import '../../domain/entities/order.dart';
@@ -9,103 +10,98 @@ import '../bloc/order_bloc.dart';
 import '../bloc/order_event.dart';
 import '../bloc/order_state.dart';
 
-class OrdersScreen extends StatefulWidget {
+class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
 
   @override
-  State<OrdersScreen> createState() => _OrdersScreenState();
-}
-
-class _OrdersScreenState extends State<OrdersScreen> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<OrderBloc>().add(LoadUserOrders());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
-      appBar: AppBar(
-        title: const Text('Mes Commandes'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+    return BlocProvider(
+      create: (context) => getIt<OrderBloc>()..add(LoadUserOrders()),
+      child: Scaffold(
+        backgroundColor: AppColors.backgroundDark,
+        appBar: AppBar(
+          title: const Text('Mes Commandes'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/home'),
+          ),
         ),
-      ),
-      body: BlocBuilder<OrderBloc, OrderState>(
-        builder: (context, state) {
-          if (state is OrderLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
-          }
+        body: BlocBuilder<OrderBloc, OrderState>(
+          builder: (context, state) {
+            if (state is OrderLoading) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              );
+            }
 
-          if (state is OrderError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    state.message,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () =>
-                        context.read<OrderBloc>().add(LoadUserOrders()),
-                    child: const Text('Réessayer'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (state is OrdersLoaded) {
-            if (state.orders.isEmpty) {
+            if (state is OrderError) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(
-                      Icons.receipt_long_outlined,
-                      size: 100,
-                      color: AppColors.textGrey,
+                      Icons.error_outline,
+                      size: 64,
+                      color: AppColors.error,
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Aucune commande pour le moment',
-                      style: TextStyle(color: AppColors.textGrey, fontSize: 18),
+                    Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.white),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => context.go('/home'),
-                      child: const Text('Commencer mes achats'),
+                      onPressed: () =>
+                          context.read<OrderBloc>().add(LoadUserOrders()),
+                      child: const Text('Réessayer'),
                     ),
                   ],
                 ),
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: state.orders.length,
-              itemBuilder: (context, index) {
-                final order = state.orders[index];
-                return _OrderCard(order: order);
-              },
-            );
-          }
+            if (state is OrdersLoaded) {
+              if (state.orders.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.receipt_long_outlined,
+                        size: 100,
+                        color: AppColors.textGrey,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Aucune commande pour le moment',
+                        style: TextStyle(
+                          color: AppColors.textGrey,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => context.go('/home'),
+                        child: const Text('Commencer mes achats'),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-          return const SizedBox.shrink();
-        },
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: state.orders.length,
+                itemBuilder: (context, index) {
+                  final order = state.orders[index];
+                  return _OrderCard(order: order);
+                },
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
