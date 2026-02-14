@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:boucherie_express/core/theme/app_colors.dart';
-import 'package:boucherie_express/features/products/presentation/screens/home_screen.dart';
-import 'package:boucherie_express/features/products/presentation/screens/search_screen.dart';
-import 'package:boucherie_express/features/cart/presentation/screens/cart_screen.dart';
+import 'package:boucherie_express/features/filter/domain/entities/product_filter.dart';
+import 'package:boucherie_express/features/filter/presentation/pages/filter_bottom_sheet.dart';
+import 'package:boucherie_express/features/home/presentation/pages/home_page.dart';
+import 'package:boucherie_express/features/home/presentation/widgets/custom_bottom_nav_bar.dart';
+import 'package:boucherie_express/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:boucherie_express/features/orders/presentation/screens/orders_screen.dart';
+import 'package:boucherie_express/features/products/domain/entities/product.dart';
 import 'package:boucherie_express/features/profile/presentation/screens/profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -15,54 +18,70 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  final GlobalKey<HomePageState> _homeKey = GlobalKey();
+  final GlobalKey<FavoritesPageState> _favoritesKey = GlobalKey();
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const CartScreen(),
+  /// Filtre actuellement appliqué (pour pré-remplir le bottom sheet).
+  ProductFilter _currentFilter = ProductFilter.defaultFilter;
+
+  late final List<Widget> _screens = [
+    HomePage(key: _homeKey),
+    FavoritesPage(
+      key: _favoritesKey,
+      onNavigateToHome: () => setState(() => _currentIndex = 0),
+    ),
+    const SizedBox.shrink(), // Placeholder pour FILTRER (index 2)
     const OrdersScreen(),
     const ProfileScreen(),
   ];
+
+  void _onNavTap(int index) {
+    if (index == 2) {
+      // Bouton FILTRER central → ouvrir un BottomSheet de filtres
+      _showFilterSheet();
+      return;
+    }
+
+    // Synchroniser les favoris entre les onglets
+    if (index == 0) {
+      _homeKey.currentState?.refreshFavorites();
+    } else if (index == 1) {
+      _favoritesKey.currentState?.reload();
+    }
+
+    setState(() => _currentIndex = index);
+  }
+
+  void _showFilterSheet() async {
+    // Le filtre n'est disponible que sur la page Home.
+    if (_currentIndex != 0) return;
+
+    final result = await FilterBottomSheet.show(
+      context,
+      currentFilter: _currentFilter,
+    );
+
+    if (result == null) return;
+
+    if (result == 'reset') {
+      // Réinitialiser les filtres.
+      _currentFilter = ProductFilter.defaultFilter;
+      _homeKey.currentState?.resetFilter();
+    } else if (result is List<Product>) {
+      // Appliquer les produits filtrés.
+      _homeKey.currentState?.applyFilteredProducts(result);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
       body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        backgroundColor: AppColors.cardDark,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textGrey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            activeIcon: Icon(Icons.search),
-            label: 'Recherche',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            activeIcon: Icon(Icons.shopping_cart),
-            label: 'Panier',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long),
-            label: 'Commandes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
+        onTap: _onNavTap,
+        isFilterEnabled: _currentIndex == 0,
       ),
     );
   }

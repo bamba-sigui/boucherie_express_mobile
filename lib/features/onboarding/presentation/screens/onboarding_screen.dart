@@ -77,75 +77,78 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.restaurant,
-                            color: AppColors.backgroundDark,
-                            size: 20,
-                          ),
                         ),
-                        const SizedBox(width: 8),
-                        const Text(
+                        child: const Icon(
+                          Icons.restaurant,
+                          color: AppColors.backgroundDark,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
                           'Boucherie Express',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
 
-                  // Page View
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: _pages.length,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        return OnboardingPageWidget(page: _pages[index]);
-                      },
-                    ),
+                // Page View
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _pages.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return OnboardingPageWidget(page: _pages[index]);
+                    },
                   ),
+                ),
 
-                  // Bottom section with indicators and button
-                  Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Page indicators
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            _pages.length,
-                            (index) => Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              width: index == _currentPage ? 32 : 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: index == _currentPage
-                                    ? AppColors.primary
-                                    : Colors.white24,
-                                borderRadius: BorderRadius.circular(3),
-                              ),
+                // Bottom section with indicators and button
+                Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Page indicators
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          _pages.length,
+                          (index) => Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: index == _currentPage ? 32 : 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: index == _currentPage
+                                  ? AppColors.primary
+                                  : Colors.white24,
+                              borderRadius: BorderRadius.circular(3),
                             ),
                           ),
                         ),
+                      ),
 
-                        // Action button
-                        Builder(
+                      // Action button
+                      Flexible(
+                        child: Builder(
                           builder: (builderContext) {
                             final isLastPage =
                                 _currentPage == _pages.length - 1;
 
                             return SizedBox(
-                              width: isLastPage ? 250 : 230,
                               height: 60,
                               child: ElevatedButton(
                                 onPressed: () {
@@ -170,15 +173,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   ),
                                 ),
                                 child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      isLastPage
-                                          ? 'Commencer mon achat'
-                                          : 'Suivant',
-                                      style: TextStyle(
-                                        fontSize: isLastPage ? 16 : 18,
-                                        fontWeight: FontWeight.bold,
+                                    Flexible(
+                                      child: Text(
+                                        isLastPage ? 'Commencer' : 'Suivant',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -189,14 +194,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             );
                           },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
+      ),
     );
   }
 }

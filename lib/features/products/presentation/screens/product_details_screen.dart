@@ -120,7 +120,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           return GestureDetector(
                             onTap: () {
                               context.read<FavoritesBloc>().add(
-                                ToggleFavoriteEvent(widget.product),
+                                FavoritesToggleRequested(widget.product),
                               );
                             },
                             child: Container(

@@ -5,7 +5,7 @@ import 'package:boucherie_express/features/onboarding/presentation/screens/onboa
 import 'package:boucherie_express/features/products/presentation/screens/main_screen.dart';
 import 'package:boucherie_express/features/cart/presentation/screens/cart_screen.dart';
 import 'package:boucherie_express/features/payment/presentation/screens/payment_method_screen.dart';
-import 'package:boucherie_express/features/favorites/presentation/screens/favorites_screen.dart';
+import 'package:boucherie_express/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/login_screen.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/signup_screen.dart';
 import 'package:boucherie_express/features/products/presentation/screens/product_details_screen.dart';
@@ -86,7 +86,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/favorites',
-        builder: (context, state) => const FavoritesScreen(),
+        builder: (context, state) => const FavoritesPage(),
       ),
     ],
     errorBuilder: (context, state) =>

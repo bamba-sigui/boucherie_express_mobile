@@ -1,70 +1,32 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:injectable/injectable.dart';
-import '../../../products/data/models/product_model.dart';
+import '../../../home/data/datasources/home_local_datasource.dart';
 import '../../../products/domain/entities/product.dart';
 
-abstract class FavoritesRemoteDataSource {
-  Future<List<ProductModel>> getFavorites();
-  Future<bool> isFavorite(String productId);
-  Future<void> toggleFavorite(Product product);
+/// Source de données locale pour les favoris.
+///
+/// Délègue à [HomeLocalDataSource] pour garantir une source de vérité unique
+/// partagée avec la feature Home. Prête à être remplacée par une API REST.
+abstract class FavoritesLocalDataSource {
+  /// Récupère tous les produits marqués comme favoris.
+  Future<List<Product>> getFavorites();
+
+  /// Retire un produit des favoris.
+  Future<void> removeFavorite(String productId);
 }
 
-@LazySingleton(as: FavoritesRemoteDataSource)
-class FavoritesRemoteDataSourceImpl implements FavoritesRemoteDataSource {
-  final FirebaseFirestore firestore;
-  final FirebaseAuth auth;
+@LazySingleton(as: FavoritesLocalDataSource)
+class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
+  final HomeLocalDataSource _homeDataSource;
 
-  FavoritesRemoteDataSourceImpl(this.firestore, this.auth);
-
-  String? get _userId => auth.currentUser?.uid;
+  FavoritesLocalDataSourceImpl(this._homeDataSource);
 
   @override
-  Future<List<ProductModel>> getFavorites() async {
-    if (_userId == null) return [];
-
-    final snapshot = await firestore
-        .collection('users')
-        .doc(_userId)
-        .collection('favorites')
-        .get();
-
-    return snapshot.docs
-        .map((doc) => ProductModel.fromJson({...doc.data(), 'id': doc.id}))
-        .toList();
+  Future<List<Product>> getFavorites() async {
+    return _homeDataSource.getFavoriteProducts();
   }
 
   @override
-  Future<bool> isFavorite(String productId) async {
-    if (_userId == null) return false;
-
-    final doc = await firestore
-        .collection('users')
-        .doc(_userId)
-        .collection('favorites')
-        .doc(productId)
-        .get();
-
-    return doc.exists;
-  }
-
-  @override
-  Future<void> toggleFavorite(Product product) async {
-    if (_userId == null) return;
-
-    final docRef = firestore
-        .collection('users')
-        .doc(_userId)
-        .collection('favorites')
-        .doc(product.id);
-
-    final doc = await docRef.get();
-    if (doc.exists) {
-      await docRef.delete();
-    } else {
-      await docRef.set(
-        (product as ProductModel).toJson(),
-      ); // Assuming it's already a model or we cast it
-    }
+  Future<void> removeFavorite(String productId) async {
+    await _homeDataSource.toggleFavorite(productId);
   }
 }

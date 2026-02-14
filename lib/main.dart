@@ -33,7 +33,8 @@ void main() async {
         ),
         BlocProvider(create: (context) => getIt<CartBloc>()..add(LoadCart())),
         BlocProvider(
-          create: (context) => getIt<FavoritesBloc>()..add(LoadFavorites()),
+          create: (context) =>
+              getIt<FavoritesBloc>()..add(const FavoritesLoadRequested()),
         ),
       ],
       child: const BoucherieExpressApp(),

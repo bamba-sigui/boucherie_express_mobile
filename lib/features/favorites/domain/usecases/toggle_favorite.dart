@@ -1,18 +1,16 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../../../products/domain/entities/product.dart';
 import '../repositories/favorites_repository.dart';
 
+/// Use case : retirer un produit des favoris.
 @injectable
-class ToggleFavorite implements UseCase<void, Product> {
+class RemoveFavorite {
   final FavoritesRepository repository;
 
-  ToggleFavorite(this.repository);
+  RemoveFavorite(this.repository);
 
-  @override
-  Future<Either<Failure, void>> call(Product product) async {
-    return await repository.toggleFavorite(product);
+  Future<Either<Failure, void>> call(String productId) async {
+    return await repository.removeFavorite(productId);
   }
 }

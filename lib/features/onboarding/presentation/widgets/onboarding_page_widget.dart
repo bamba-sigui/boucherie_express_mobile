@@ -10,133 +10,131 @@ class OnboardingPageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Spacer(flex: 1),
-
-        // Image with badge in rounded container
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // White/light gray rounded container
-              Container(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(32),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: CachedNetworkImage(
-                    imageUrl: page.imageUrl,
-                    fit: BoxFit.contain,
-                    placeholder: (context, url) => Container(
-                      color: const Color(0xFFF5F5F5),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: const Color(0xFFF5F5F5),
-                      child: const Icon(
-                        Icons.restaurant,
-                        color: AppColors.textGrey,
-                        size: 80,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Badge "100% FRAIS"
-              Positioned(
-                bottom: -20,
-                right: 1,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 13,
-                    vertical: 13,
-                  ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image with badge in rounded container
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // White/light gray rounded container
+                Container(
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height * 0.4,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(100),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(32),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.verified,
-                        color: AppColors.backgroundDark,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        page.badgeText,
-                        style: const TextStyle(
-                          color: AppColors.backgroundDark,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(32),
+                    child: CachedNetworkImage(
+                      imageUrl: page.imageUrl,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => Container(
+                        color: const Color(0xFFF5F5F5),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
-                    ],
+                      errorWidget: (context, url, error) => Container(
+                        color: const Color(0xFFF5F5F5),
+                        child: const Icon(
+                          Icons.restaurant,
+                          color: AppColors.textGrey,
+                          size: 80,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
 
-        const SizedBox(height: 48),
-
-        // Title with mixed colors
-        Padding(
-          padding: const EdgeInsets.symmetric( horizontal: 32),
-          child: RichText(
-            textAlign: TextAlign.start,
-            text: TextSpan(
-              style: const TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
-              ),
-              children: _buildTitleSpans(page.title),
+                // Badge "100% FRAIS"
+                Positioned(
+                  bottom: -20,
+                  right: 1,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 13,
+                      vertical: 13,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.4),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.verified,
+                          color: AppColors.backgroundDark,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          page.badgeText,
+                          style: const TextStyle(
+                            color: AppColors.backgroundDark,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
 
-        const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-        // Description
-        Padding(
-          padding: const EdgeInsets.symmetric( horizontal: 32),
-          child: Text(
-            page.description,
-            textAlign: TextAlign.start,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 16,
-              height: 1.5,
+          // Title with mixed colors
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: RichText(
+              textAlign: TextAlign.start,
+              text: TextSpan(
+                style: const TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                ),
+                children: _buildTitleSpans(page.title),
+              ),
             ),
           ),
-        ),
 
-        const Spacer(flex: 2),
-      ],
+          const SizedBox(height: 16),
+
+          // Description
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              page.description,
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 16,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

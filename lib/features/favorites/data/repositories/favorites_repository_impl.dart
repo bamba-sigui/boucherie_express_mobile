@@ -5,16 +5,20 @@ import '../../../products/domain/entities/product.dart';
 import '../../domain/repositories/favorites_repository.dart';
 import '../datasources/favorites_remote_datasource.dart';
 
+/// Implémentation du repository Favoris.
+///
+/// Délègue à [FavoritesLocalDataSource] (qui partage la source de vérité
+/// avec Home via [HomeLocalDataSource]).
 @LazySingleton(as: FavoritesRepository)
 class FavoritesRepositoryImpl implements FavoritesRepository {
-  final FavoritesRemoteDataSource remoteDataSource;
+  final FavoritesLocalDataSource _localDataSource;
 
-  FavoritesRepositoryImpl(this.remoteDataSource);
+  FavoritesRepositoryImpl(this._localDataSource);
 
   @override
   Future<Either<Failure, List<Product>>> getFavorites() async {
     try {
-      final favorites = await remoteDataSource.getFavorites();
+      final favorites = await _localDataSource.getFavorites();
       return Right(favorites);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -22,19 +26,9 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> isFavorite(String productId) async {
+  Future<Either<Failure, void>> removeFavorite(String productId) async {
     try {
-      final isFav = await remoteDataSource.isFavorite(productId);
-      return Right(isFav);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> toggleFavorite(Product product) async {
-    try {
-      await remoteDataSource.toggleFavorite(product);
+      await _localDataSource.removeFavorite(productId);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
