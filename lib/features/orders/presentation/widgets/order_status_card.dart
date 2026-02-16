@@ -15,11 +15,7 @@ class OrderStatusCard extends StatelessWidget {
   final OrderStatus status;
   final VoidCallback? onTap;
 
-  const OrderStatusCard({
-    super.key,
-    required this.status,
-    this.onTap,
-  });
+  const OrderStatusCard({super.key, required this.status, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +32,7 @@ class OrderStatusCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.cardDark,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.05),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
           ),
           child: Row(
             children: [
@@ -82,11 +76,7 @@ class OrderStatusCard extends StatelessWidget {
               ),
 
               // ── Chevron ──
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey.shade600,
-                size: 24,
-              ),
+              Icon(Icons.chevron_right, color: Colors.grey.shade600, size: 24),
             ],
           ),
         ),
@@ -97,35 +87,35 @@ class OrderStatusCard extends StatelessWidget {
   (Color, String, IconData) _statusData(OrderStatus status) {
     return switch (status) {
       OrderStatus.pending => (
-          AppColors.statusOrange,
-          'En attente de confirmation',
-          Icons.hourglass_top,
-        ),
+        AppColors.statusOrange,
+        'En attente de confirmation',
+        Icons.hourglass_top,
+      ),
       OrderStatus.confirmed => (
-          AppColors.statusBlue,
-          'Commande confirmée',
-          Icons.check_circle_outline,
-        ),
+        AppColors.statusBlue,
+        'Commande confirmée',
+        Icons.check_circle_outline,
+      ),
       OrderStatus.preparing => (
-          AppColors.statusOrange,
-          'En cours de préparation',
-          Icons.restaurant,
-        ),
+        AppColors.statusOrange,
+        'En cours de préparation',
+        Icons.restaurant,
+      ),
       OrderStatus.delivering => (
-          AppColors.statusBlue,
-          'En cours de livraison',
-          Icons.local_shipping,
-        ),
+        AppColors.statusBlue,
+        'En cours de livraison',
+        Icons.local_shipping,
+      ),
       OrderStatus.delivered => (
-          AppColors.statusGreen,
-          'Livrée avec succès',
-          Icons.check_circle,
-        ),
+        AppColors.statusGreen,
+        'Livrée avec succès',
+        Icons.check_circle,
+      ),
       OrderStatus.cancelled => (
-          AppColors.error,
-          'Commande annulée',
-          Icons.cancel_outlined,
-        ),
+        AppColors.error,
+        'Commande annulée',
+        Icons.cancel_outlined,
+      ),
     };
   }
 }

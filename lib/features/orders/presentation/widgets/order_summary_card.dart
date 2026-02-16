@@ -28,9 +28,7 @@ class OrderSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardDark,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: [
@@ -43,10 +41,7 @@ class OrderSummaryCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Divider
-          Container(
-            height: 1,
-            color: Colors.white.withValues(alpha: 0.05),
-          ),
+          Container(height: 1, color: Colors.white.withValues(alpha: 0.05)),
           const SizedBox(height: 12),
 
           // Total
@@ -82,18 +77,9 @@ class OrderSummaryCard extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: Colors.grey.shade500,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
-        ),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14)),
       ],
     );
   }
@@ -101,12 +87,10 @@ class OrderSummaryCard extends StatelessWidget {
   /// Formate le prix avec séparateur de milliers (ex: 14.500 FCFA).
   String _formatPrice(double amount) {
     final intAmount = amount.toInt();
-    final formatted = intAmount
-        .toString()
-        .replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]}.',
-        );
+    final formatted = intAmount.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
     return '$formatted FCFA';
   }
 }

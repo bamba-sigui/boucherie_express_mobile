@@ -38,11 +38,8 @@ class OrderDetailsPage extends StatefulWidget {
   /// ID de la commande (alternative au pré-chargement).
   final String? orderId;
 
-  const OrderDetailsPage({
-    super.key,
-    this.order,
-    this.orderId,
-  }) : assert(order != null || orderId != null);
+  const OrderDetailsPage({super.key, this.order, this.orderId})
+    : assert(order != null || orderId != null);
 
   @override
   State<OrderDetailsPage> createState() => _OrderDetailsPageState();
@@ -227,10 +224,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage>
                     const SizedBox(height: 16),
                     Text(
                       message,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -349,13 +343,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage>
           decoration: BoxDecoration(
             color: AppColors.cardDark,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.05),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
           ),
-          child: Column(
-            children: _buildItemTiles(order.items),
-          ),
+          child: Column(children: _buildItemTiles(order.items)),
         ),
       ],
     );

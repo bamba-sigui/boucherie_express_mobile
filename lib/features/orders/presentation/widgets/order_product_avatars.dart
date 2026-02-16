@@ -29,23 +29,16 @@ class OrderProductAvatars extends StatelessWidget {
     final avatars = <Widget>[];
 
     for (int i = 0; i < visibleCount; i++) {
-      avatars.add(
-        _buildImageAvatar(items[i].imageUrl, i),
-      );
+      avatars.add(_buildImageAvatar(items[i].imageUrl, i));
     }
 
     if (remaining > 0) {
-      avatars.add(
-        _buildCountBadge(remaining, visibleCount),
-      );
+      avatars.add(_buildCountBadge(remaining, visibleCount));
     }
 
     return SizedBox(
       height: 32,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: avatars,
-      ),
+      child: Stack(clipBehavior: Clip.none, children: avatars),
     );
   }
 
@@ -57,10 +50,7 @@ class OrderProductAvatars extends StatelessWidget {
         height: 32,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(
-            color: AppColors.cardDark,
-            width: 2,
-          ),
+          border: Border.all(color: AppColors.cardDark, width: 2),
           color: const Color(0xFF1E293B), // slate-800 fallback
         ),
         child: ClipOval(
@@ -76,11 +66,7 @@ class OrderProductAvatars extends StatelessWidget {
                     color: Colors.white54,
                   ),
                 )
-              : const Icon(
-                  Icons.restaurant,
-                  size: 14,
-                  color: Colors.white54,
-                ),
+              : const Icon(Icons.restaurant, size: 14, color: Colors.white54),
         ),
       ),
     );
@@ -95,10 +81,7 @@ class OrderProductAvatars extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B), // slate-800
           shape: BoxShape.circle,
-          border: Border.all(
-            color: AppColors.cardDark,
-            width: 2,
-          ),
+          border: Border.all(color: AppColors.cardDark, width: 2),
         ),
         child: Center(
           child: Text(

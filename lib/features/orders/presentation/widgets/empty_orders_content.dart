@@ -39,13 +39,10 @@ class _EmptyOrdersContentState extends State<EmptyOrdersContent>
       parent: _fadeController,
       curve: Curves.easeOut,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.08),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(
+          CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
+        );
     _fadeController.forward();
   }
 
@@ -130,9 +127,7 @@ class _EmptyOrdersContentState extends State<EmptyOrdersContent>
             decoration: BoxDecoration(
               color: AppColors.cardDark,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.4),
@@ -160,10 +155,7 @@ class _EmptyOrdersContentState extends State<EmptyOrdersContent>
               decoration: BoxDecoration(
                 color: AppColors.accentRed,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.backgroundDark,
-                  width: 4,
-                ),
+                border: Border.all(color: AppColors.backgroundDark, width: 4),
               ),
               child: const Center(
                 child: Icon(

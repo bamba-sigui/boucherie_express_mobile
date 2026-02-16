@@ -35,11 +35,7 @@ class OrderDetailsHeader extends StatelessWidget {
   final Order order;
   final VoidCallback? onBack;
 
-  const OrderDetailsHeader({
-    super.key,
-    required this.order,
-    this.onBack,
-  });
+  const OrderDetailsHeader({super.key, required this.order, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +44,7 @@ class OrderDetailsHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.backgroundDark.withValues(alpha: 0.9),
         border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.05),
-          ),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
         ),
       ),
       child: Row(

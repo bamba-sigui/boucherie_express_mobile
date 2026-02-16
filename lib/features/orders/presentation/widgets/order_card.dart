@@ -88,9 +88,7 @@ class OrderCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.cardDark,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,10 +151,7 @@ class OrderCard extends StatelessWidget {
               // Date formatée
               Text(
                 order.orderedAt.toOrderLabel(),
-                style: TextStyle(
-                  color: Colors.grey.shade500,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
               ),
             ],
           ),
@@ -206,12 +201,10 @@ class OrderCard extends StatelessWidget {
   /// Formate le prix avec séparateur de milliers (ex: 12.500 FCFA).
   String _formatPrice(double amount) {
     final intAmount = amount.toInt();
-    final formatted = intAmount
-        .toString()
-        .replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]}.',
-        );
+    final formatted = intAmount.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
     return '$formatted FCFA';
   }
 }

@@ -21,9 +21,7 @@ class DeliveryAddressCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardDark,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,11 +29,7 @@ class DeliveryAddressCard extends StatelessWidget {
           // ── Label ──
           Row(
             children: [
-              Icon(
-                Icons.location_on,
-                color: Colors.grey.shade500,
-                size: 16,
-              ),
+              Icon(Icons.location_on, color: Colors.grey.shade500, size: 16),
               const SizedBox(width: 8),
               Text(
                 'ADRESSE DE LIVRAISON',

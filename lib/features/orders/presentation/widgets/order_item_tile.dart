@@ -107,12 +107,10 @@ class OrderItemTile extends StatelessWidget {
   /// Formate le prix avec séparateur de milliers (ex: 11.000 FCFA).
   String _formatPrice(double amount) {
     final intAmount = amount.toInt();
-    final formatted = intAmount
-        .toString()
-        .replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]}.',
-        );
+    final formatted = intAmount.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
     return '$formatted FCFA';
   }
 }

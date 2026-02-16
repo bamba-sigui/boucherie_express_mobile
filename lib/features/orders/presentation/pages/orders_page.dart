@@ -110,9 +110,7 @@ class OrdersPageState extends State<OrdersPage> {
 
   /// État vide — délègue au widget dédié.
   Widget _buildEmptyState() {
-    return EmptyOrdersContent(
-      onCommanderMaintenant: widget.onNavigateToHome,
-    );
+    return EmptyOrdersContent(onCommanderMaintenant: widget.onNavigateToHome);
   }
 
   /// État d'erreur avec bouton réessayer.
@@ -159,10 +157,7 @@ class _OrdersListView extends StatefulWidget {
   final List<Order> orders;
   final VoidCallback? onNavigateToHome;
 
-  const _OrdersListView({
-    required this.orders,
-    this.onNavigateToHome,
-  });
+  const _OrdersListView({required this.orders, this.onNavigateToHome});
 
   @override
   State<_OrdersListView> createState() => _OrdersListViewState();
