@@ -10,10 +10,11 @@ import 'package:boucherie_express/features/auth/presentation/screens/login_scree
 import 'package:boucherie_express/features/auth/presentation/screens/signup_screen.dart';
 import 'package:boucherie_express/features/products/presentation/screens/product_details_screen.dart';
 import 'package:boucherie_express/features/products/domain/entities/product.dart';
-import 'package:boucherie_express/features/orders/presentation/screens/checkout_screen.dart';
+import 'package:boucherie_express/features/checkout/presentation/screens/checkout_screen.dart';
 import 'package:boucherie_express/features/orders/domain/entities/order.dart';
 import 'package:boucherie_express/features/orders/presentation/screens/orders_screen.dart';
 import 'package:boucherie_express/features/orders/presentation/pages/order_details_page.dart';
+import 'package:boucherie_express/features/order_tracking/presentation/screens/order_tracking_screen.dart';
 
 /// App router configuration
 class AppRouter {
@@ -87,6 +88,14 @@ class AppRouter {
       GoRoute(
         path: '/favorites',
         builder: (context, state) => const FavoritesPage(),
+      ),
+      GoRoute(
+        path: '/order-tracking',
+        name: 'order-tracking',
+        builder: (context, state) {
+          final orderId = state.extra as String? ?? '';
+          return OrderTrackingScreen(orderId: orderId);
+        },
       ),
     ],
     errorBuilder: (context, state) =>
