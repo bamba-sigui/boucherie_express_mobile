@@ -20,6 +20,7 @@ class OrderItem extends Equatable {
   final double price;
   final int quantity;
   final String option;
+  final String? imageUrl;
 
   const OrderItem({
     required this.productId,
@@ -27,6 +28,7 @@ class OrderItem extends Equatable {
     required this.price,
     required this.quantity,
     required this.option,
+    this.imageUrl,
   });
 
   @override

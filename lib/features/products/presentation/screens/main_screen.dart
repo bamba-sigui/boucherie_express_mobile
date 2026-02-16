@@ -5,7 +5,7 @@ import 'package:boucherie_express/features/filter/presentation/pages/filter_bott
 import 'package:boucherie_express/features/home/presentation/pages/home_page.dart';
 import 'package:boucherie_express/features/home/presentation/widgets/custom_bottom_nav_bar.dart';
 import 'package:boucherie_express/features/favorites/presentation/pages/favorites_page.dart';
-import 'package:boucherie_express/features/orders/presentation/screens/orders_screen.dart';
+import 'package:boucherie_express/features/orders/presentation/pages/orders_page.dart';
 import 'package:boucherie_express/features/products/domain/entities/product.dart';
 import 'package:boucherie_express/features/profile/presentation/screens/profile_screen.dart';
 
@@ -20,6 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final GlobalKey<HomePageState> _homeKey = GlobalKey();
   final GlobalKey<FavoritesPageState> _favoritesKey = GlobalKey();
+  final GlobalKey<OrdersPageState> _ordersKey = GlobalKey();
 
   /// Filtre actuellement appliqué (pour pré-remplir le bottom sheet).
   ProductFilter _currentFilter = ProductFilter.defaultFilter;
@@ -31,7 +32,10 @@ class _MainScreenState extends State<MainScreen> {
       onNavigateToHome: () => setState(() => _currentIndex = 0),
     ),
     const SizedBox.shrink(), // Placeholder pour FILTRER (index 2)
-    const OrdersScreen(),
+    OrdersPage(
+      key: _ordersKey,
+      onNavigateToHome: () => setState(() => _currentIndex = 0),
+    ),
     const ProfileScreen(),
   ];
 
@@ -42,11 +46,13 @@ class _MainScreenState extends State<MainScreen> {
       return;
     }
 
-    // Synchroniser les favoris entre les onglets
+    // Synchroniser les données entre les onglets
     if (index == 0) {
       _homeKey.currentState?.refreshFavorites();
     } else if (index == 1) {
       _favoritesKey.currentState?.reload();
+    } else if (index == 3) {
+      _ordersKey.currentState?.reload();
     }
 
     setState(() => _currentIndex = index);

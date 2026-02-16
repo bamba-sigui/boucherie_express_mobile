@@ -19,6 +19,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   }) : super(OrderInitial()) {
     on<CreateOrderRequested>(_onCreateOrder);
     on<LoadUserOrders>(_onLoadUserOrders);
+    on<LoadOrderDetails>(_onLoadOrderDetails);
   }
 
   Future<void> _onCreateOrder(
@@ -47,6 +48,20 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     result.fold(
       (failure) => emit(OrderError(failure.message)),
       (orders) => emit(OrdersLoaded(orders)),
+    );
+  }
+
+  Future<void> _onLoadOrderDetails(
+    LoadOrderDetails event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(OrderLoading());
+
+    final result = await getOrderById(event.orderId);
+
+    result.fold(
+      (failure) => emit(OrderError(failure.message)),
+      (order) => emit(OrderDetailsLoaded(order)),
     );
   }
 }

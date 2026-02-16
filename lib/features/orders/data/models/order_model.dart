@@ -33,6 +33,7 @@ class OrderModel extends Order {
               price: (item['price'] as num).toDouble(),
               quantity: item['quantity'] as int,
               option: item['option'] as String,
+              imageUrl: item['imageUrl'] as String?,
             ),
           )
           .toList(),
@@ -64,6 +65,7 @@ class OrderModel extends Order {
               'price': item.price,
               'quantity': item.quantity,
               'option': item.option,
+              'imageUrl': item.imageUrl,
             },
           )
           .toList(),

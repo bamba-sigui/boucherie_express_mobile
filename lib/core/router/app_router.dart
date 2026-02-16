@@ -13,7 +13,7 @@ import 'package:boucherie_express/features/products/domain/entities/product.dart
 import 'package:boucherie_express/features/orders/presentation/screens/checkout_screen.dart';
 import 'package:boucherie_express/features/orders/domain/entities/order.dart';
 import 'package:boucherie_express/features/orders/presentation/screens/orders_screen.dart';
-import 'package:boucherie_express/features/orders/presentation/screens/order_details_screen.dart';
+import 'package:boucherie_express/features/orders/presentation/pages/order_details_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -73,7 +73,7 @@ class AppRouter {
         name: 'order-details',
         builder: (context, state) {
           final order = state.extra as Order;
-          return OrderDetailsScreen(order: order);
+          return OrderDetailsPage(order: order);
         },
       ),
       GoRoute(

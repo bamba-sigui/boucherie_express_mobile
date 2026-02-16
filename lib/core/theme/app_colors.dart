@@ -32,6 +32,11 @@ class AppColors {
   static const Color error = Color(0xFFEF5350);
   static const Color info = Color(0xFF42A5F5);
 
+  // Order Status Colors (Stitch design)
+  static const Color statusOrange = Color(0xFFF59E0B);
+  static const Color statusBlue = Color(0xFF3B82F6);
+  static const Color statusGreen = Color(0xFF10B981);
+
   // Gradient Colors
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primary, primaryDark],

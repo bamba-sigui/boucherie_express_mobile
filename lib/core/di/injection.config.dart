@@ -78,6 +78,8 @@ import '../../features/onboarding/domain/usecases/complete_onboarding.dart'
 import '../../features/onboarding/presentation/bloc/onboarding_bloc.dart'
     as _i792;
 import '../../features/onboarding/presentation/bloc/splash_bloc.dart' as _i302;
+import '../../features/orders/data/datasources/order_local_datasource.dart'
+    as _i303;
 import '../../features/orders/data/datasources/order_remote_datasource.dart'
     as _i1007;
 import '../../features/orders/data/repositories/order_repository_impl.dart'
@@ -128,6 +130,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i314.HomeLocalDataSourceImpl());
     gh.lazySingleton<_i339.CartLocalDataSource>(
         () => _i339.CartLocalDataSourceImpl());
+    gh.lazySingleton<_i303.OrderLocalDataSource>(
+        () => _i303.OrderLocalDataSourceImpl());
     gh.lazySingleton<_i333.ProductRemoteDataSource>(
         () => _i333.ProductRemoteDataSourceImpl(gh<_i974.FirebaseFirestore>()));
     gh.lazySingleton<_i322.CartRepository>(
@@ -160,7 +164,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i804.OnboardingLocalDataSource>(() =>
         _i804.OnboardingLocalDataSourceImpl(gh<_i460.SharedPreferences>()));
     gh.lazySingleton<_i543.OrderRepository>(() => _i376.OrderRepositoryImpl(
-        remoteDataSource: gh<_i1007.OrderRemoteDataSource>()));
+          remoteDataSource: gh<_i1007.OrderRemoteDataSource>(),
+          localDataSource: gh<_i303.OrderLocalDataSource>(),
+        ));
     gh.lazySingleton<_i530.ApplyFilter>(
         () => _i530.ApplyFilter(gh<_i131.FilterRepository>()));
     gh.lazySingleton<_i460.ResetFilter>(

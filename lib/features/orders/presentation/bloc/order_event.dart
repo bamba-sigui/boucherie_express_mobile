@@ -19,6 +19,15 @@ class CreateOrderRequested extends OrderEvent {
 
 class LoadUserOrders extends OrderEvent {}
 
+class LoadOrderDetails extends OrderEvent {
+  final String orderId;
+
+  const LoadOrderDetails(this.orderId);
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
 class UpdateOrderStatusRequested extends OrderEvent {
   final String orderId;
   final OrderStatus status;
