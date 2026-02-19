@@ -53,6 +53,8 @@ class ProfileError extends ProfileState {
   List<Object?> get props => [message];
 }
 
+class ProfileNotAuthenticated extends ProfileState {}
+
 class LogoutSuccess extends ProfileState {}
 
 @injectable
@@ -81,7 +83,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       if (user != null) {
         emit(ProfileLoaded(user));
       } else {
-        emit(const ProfileError('Utilisateur non trouvé'));
+        emit(ProfileNotAuthenticated());
       }
     });
   }

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/domain/usecases/get_current_user.dart';
 import '../bloc/cart_bloc.dart';
 import '../widgets/cart_item_card.dart';
 import '../widgets/cart_summary.dart';
@@ -172,8 +174,74 @@ class _CartScreenState extends State<CartScreen> {
         ),
 
         // ── Footer panel ──
-        _CartFooter(cart: cart, onCheckout: () => context.push('/checkout')),
+        _CartFooter(
+          cart: cart,
+          onCheckout: () async {
+            final result = await getIt<GetCurrentUser>()();
+            final user = result.getOrElse(() => null);
+            if (!context.mounted) return;
+            if (user != null) {
+              context.push('/checkout');
+            } else {
+              _showAuthRequiredDialog(context);
+            }
+          },
+        ),
       ],
+    );
+  }
+
+  void _showAuthRequiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: AppColors.cardDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withValues(alpha: .05)),
+        ),
+        title: const Text(
+          'Connexion requise',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(
+          'Vous devez être connecté pour passer une commande.',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: .6),
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(
+              'ANNULER',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: .4),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogCtx);
+              context.push('/phone-auth');
+            },
+            child: const Text(
+              'SE CONNECTER',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -8,6 +8,8 @@ import 'package:boucherie_express/features/payment/presentation/screens/payment_
 import 'package:boucherie_express/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/login_screen.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/signup_screen.dart';
+import 'package:boucherie_express/features/auth/presentation/screens/phone_input_screen.dart';
+import 'package:boucherie_express/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:boucherie_express/features/products/presentation/screens/product_details_screen.dart';
 import 'package:boucherie_express/features/products/domain/entities/product.dart';
 import 'package:boucherie_express/features/checkout/presentation/screens/checkout_screen.dart';
@@ -15,6 +17,10 @@ import 'package:boucherie_express/features/orders/domain/entities/order.dart';
 import 'package:boucherie_express/features/orders/presentation/screens/orders_screen.dart';
 import 'package:boucherie_express/features/orders/presentation/pages/order_details_page.dart';
 import 'package:boucherie_express/features/order_tracking/presentation/screens/order_tracking_screen.dart';
+import 'package:boucherie_express/features/profile/presentation/screens/personal_info_screen.dart';
+import 'package:boucherie_express/features/profile/presentation/screens/addresses_screen.dart';
+import 'package:boucherie_express/features/profile/presentation/screens/payment_methods_screen.dart';
+import 'package:boucherie_express/features/profile/presentation/pages/support_page.dart';
 
 /// App router configuration
 class AppRouter {
@@ -95,6 +101,42 @@ class AppRouter {
         builder: (context, state) {
           final orderId = state.extra as String? ?? '';
           return OrderTrackingScreen(orderId: orderId);
+        },
+      ),
+      GoRoute(
+        path: '/personal-info',
+        name: 'personal-info',
+        builder: (context, state) => const PersonalInfoScreen(),
+      ),
+      GoRoute(
+        path: '/addresses',
+        name: 'addresses',
+        builder: (context, state) => const AddressesScreen(),
+      ),
+      GoRoute(
+        path: '/payment-methods',
+        name: 'payment-methods',
+        builder: (context, state) => const PaymentMethodsScreen(),
+      ),
+      GoRoute(
+        path: '/support',
+        name: 'support',
+        builder: (context, state) => const SupportPage(),
+      ),
+      GoRoute(
+        path: '/phone-auth',
+        name: 'phone-auth',
+        builder: (context, state) => const PhoneInputScreen(),
+      ),
+      GoRoute(
+        path: '/otp-verification',
+        name: 'otp-verification',
+        builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>;
+          return OtpVerificationScreen(
+            phone: data['phone'] as String,
+            formattedPhone: data['formattedPhone'] as String,
+          );
         },
       ),
     ],

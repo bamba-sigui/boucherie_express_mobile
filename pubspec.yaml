@@ -67,6 +67,9 @@ dependencies:
   flutter_form_builder: ^10.1.0
   form_builder_validators: ^11.0.0
 
+  # URL Launcher
+  url_launcher: ^6.3.1
+
   # Utilities
   dartz: ^0.10.1
   logger: ^2.5.0
