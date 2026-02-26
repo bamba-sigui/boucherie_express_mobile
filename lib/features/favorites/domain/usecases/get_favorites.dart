@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../repositories/favorites_repository.dart';
 
 /// Use case : récupérer la liste des produits favoris.

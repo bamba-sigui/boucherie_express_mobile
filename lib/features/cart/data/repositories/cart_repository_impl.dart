@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../../domain/entities/cart.dart';
 import '../../domain/repositories/cart_repository.dart';
 import '../datasources/cart_local_datasource.dart';

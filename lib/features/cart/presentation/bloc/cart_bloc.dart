@@ -7,7 +7,7 @@ import '../../domain/usecases/add_to_cart.dart';
 import '../../domain/usecases/get_cart.dart';
 import '../../domain/usecases/remove_from_cart.dart';
 import '../../domain/usecases/update_cart_item_quantity.dart' as uc;
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 
 part 'cart_event.dart';
 part 'cart_state.dart';

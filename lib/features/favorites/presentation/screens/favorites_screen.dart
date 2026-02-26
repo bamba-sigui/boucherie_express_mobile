@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/favorites_bloc.dart';
-import '../../../products/presentation/widgets/product_card.dart';
+import '../../../home/presentation/widgets/product_card.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});

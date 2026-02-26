@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../../domain/usecases/get_favorites.dart';
 import '../../domain/usecases/toggle_favorite.dart';
 

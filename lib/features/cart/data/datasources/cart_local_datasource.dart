@@ -2,7 +2,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/cart.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../models/cart_item_model.dart';
 
 /// Local data source for cart

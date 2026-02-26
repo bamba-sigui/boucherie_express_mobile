@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../../domain/entities/home_category.dart';
 
 /// Source de données locale (mock) pour la feature Home.

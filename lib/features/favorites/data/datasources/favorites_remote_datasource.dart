@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 import '../../../home/data/datasources/home_local_datasource.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 
 /// Source de données locale pour les favoris.
 ///

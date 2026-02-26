@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../repositories/home_repository.dart';
 
 /// Cas d'utilisation : récupérer les produits (avec filtre catégorie optionnel).

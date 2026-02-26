@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 import '../../domain/entities/cart.dart';
-import '../../../products/data/models/product_model.dart';
+import '../../../shared/data/models/product_model.dart';
 
 part 'cart_item_model.g.dart';
 

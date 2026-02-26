@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:boucherie_express/features/products/domain/entities/product.dart';
+import 'package:boucherie_express/features/shared/domain/entities/product.dart';
 
 /// Cart item entity
 class CartItem extends Equatable {

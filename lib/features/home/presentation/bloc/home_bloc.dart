@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../../domain/entities/home_category.dart';
 import '../../domain/usecases/get_home_categories.dart';
 import '../../domain/usecases/get_home_favorite_ids.dart';

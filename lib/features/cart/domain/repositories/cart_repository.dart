@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/cart.dart';
-import 'package:boucherie_express/features/products/domain/entities/product.dart';
+import 'package:boucherie_express/features/shared/domain/entities/product.dart';
 
 /// Cart repository interface
 abstract class CartRepository {

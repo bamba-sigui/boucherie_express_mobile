@@ -66,13 +66,13 @@ import '../../features/favorites/domain/usecases/get_favorites.dart' as _i418;
 import '../../features/favorites/domain/usecases/toggle_favorite.dart' as _i189;
 import '../../features/favorites/presentation/bloc/favorites_bloc.dart'
     as _i429;
-import '../../features/filter/data/repositories/filter_repository_impl.dart'
+import '../../features/home/data/repositories/filter_repository_impl.dart'
     as _i1033;
-import '../../features/filter/domain/repositories/filter_repository.dart'
+import '../../features/home/domain/repositories/filter_repository.dart'
     as _i131;
-import '../../features/filter/domain/usecases/apply_filter.dart' as _i530;
-import '../../features/filter/domain/usecases/reset_filter.dart' as _i460;
-import '../../features/filter/presentation/bloc/filter_bloc.dart' as _i1006;
+import '../../features/home/domain/usecases/apply_filter.dart' as _i530;
+import '../../features/home/domain/usecases/reset_filter.dart' as _i460;
+import '../../features/home/presentation/bloc/filter_bloc.dart' as _i1006;
 import '../../features/home/data/datasources/home_local_datasource.dart'
     as _i314;
 import '../../features/home/data/repositories/home_repository_impl.dart'
@@ -121,17 +121,17 @@ import '../../features/orders/domain/usecases/create_order.dart' as _i725;
 import '../../features/orders/domain/usecases/get_order_by_id.dart' as _i43;
 import '../../features/orders/domain/usecases/get_user_orders.dart' as _i299;
 import '../../features/orders/presentation/bloc/order_bloc.dart' as _i298;
-import '../../features/products/data/datasources/product_remote_datasource.dart'
+import '../../features/home/data/datasources/product_remote_datasource.dart'
     as _i333;
-import '../../features/products/data/repositories/product_repository_impl.dart'
+import '../../features/home/data/repositories/product_repository_impl.dart'
     as _i764;
-import '../../features/products/domain/repositories/product_repository.dart'
+import '../../features/home/domain/repositories/product_repository.dart'
     as _i963;
-import '../../features/products/domain/usecases/get_all_products.dart' as _i910;
-import '../../features/products/domain/usecases/get_categories.dart' as _i2;
-import '../../features/products/domain/usecases/get_product_by_id.dart'
+import '../../features/home/domain/usecases/get_all_products.dart' as _i910;
+import '../../features/home/domain/usecases/get_categories.dart' as _i2;
+import '../../features/home/domain/usecases/get_product_by_id.dart'
     as _i147;
-import '../../features/products/presentation/bloc/product_bloc.dart' as _i28;
+import '../../features/home/presentation/bloc/product_bloc.dart' as _i28;
 import '../../features/profile/data/datasources/support_local_datasource.dart'
     as _i907;
 import '../../features/profile/data/repositories/address_repository_impl.dart'

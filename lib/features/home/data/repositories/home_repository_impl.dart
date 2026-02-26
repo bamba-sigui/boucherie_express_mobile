@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
-import '../../../products/domain/entities/product.dart';
+import '../../../shared/domain/entities/product.dart';
 import '../../domain/entities/home_category.dart';
 import '../../domain/repositories/home_repository.dart';
 import '../datasources/home_local_datasource.dart';
