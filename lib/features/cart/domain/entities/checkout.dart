@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../cart/domain/entities/cart.dart';
+import 'cart.dart';
 import 'delivery_address.dart';
 import 'payment_method.dart';
 

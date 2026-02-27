@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../cart/domain/entities/cart.dart';
-import '../../../cart/presentation/bloc/cart_bloc.dart';
+import '../../domain/entities/cart.dart';
+import '../bloc/cart_bloc.dart';
 import '../bloc/checkout_bloc.dart';
 import '../widgets/checkout_summary.dart';
 import '../widgets/delivery_address_card.dart';

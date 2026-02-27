@@ -200,7 +200,6 @@ class _OrderTrackingView extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                // Re-dispatch avec le même orderId via le bloc
                 final bloc = context.read<OrderTrackingBloc>();
                 bloc.add(const RefreshOrderTracking());
               },

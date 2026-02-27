@@ -46,16 +46,16 @@ import '../../features/cart/domain/usecases/remove_from_cart.dart' as _i904;
 import '../../features/cart/domain/usecases/update_cart_item_quantity.dart'
     as _i170;
 import '../../features/cart/presentation/bloc/cart_bloc.dart' as _i517;
-import '../../features/checkout/data/repositories/checkout_repository_impl.dart'
+import '../../features/cart/data/repositories/checkout_repository_impl.dart'
     as _i949;
-import '../../features/checkout/domain/repositories/checkout_repository.dart'
+import '../../features/cart/domain/repositories/checkout_repository.dart'
     as _i498;
-import '../../features/checkout/domain/usecases/get_default_address.dart'
+import '../../features/cart/domain/usecases/get_default_address.dart'
     as _i319;
-import '../../features/checkout/domain/usecases/get_payment_methods.dart'
+import '../../features/cart/domain/usecases/get_payment_methods.dart'
     as _i589;
-import '../../features/checkout/domain/usecases/place_order.dart' as _i1041;
-import '../../features/checkout/presentation/bloc/checkout_bloc.dart' as _i909;
+import '../../features/cart/domain/usecases/place_order.dart' as _i1041;
+import '../../features/cart/presentation/bloc/checkout_bloc.dart' as _i909;
 import '../../features/favorites/data/datasources/favorites_remote_datasource.dart'
     as _i904;
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart'
@@ -99,15 +99,15 @@ import '../../features/onboarding/domain/usecases/complete_onboarding.dart'
 import '../../features/onboarding/presentation/bloc/onboarding_bloc.dart'
     as _i792;
 import '../../features/onboarding/presentation/bloc/splash_bloc.dart' as _i302;
-import '../../features/order_tracking/data/repositories/order_tracking_repository_impl.dart'
+import '../../features/orders/data/repositories/order_tracking_repository_impl.dart'
     as _i632;
-import '../../features/order_tracking/domain/repositories/order_tracking_repository.dart'
+import '../../features/orders/domain/repositories/order_tracking_repository.dart'
     as _i578;
-import '../../features/order_tracking/domain/usecases/get_order_tracking.dart'
+import '../../features/orders/domain/usecases/get_order_tracking.dart'
     as _i344;
-import '../../features/order_tracking/domain/usecases/refresh_order_status.dart'
+import '../../features/orders/domain/usecases/refresh_order_status.dart'
     as _i255;
-import '../../features/order_tracking/presentation/bloc/order_tracking_bloc.dart'
+import '../../features/orders/presentation/bloc/order_tracking_bloc.dart'
     as _i957;
 import '../../features/orders/data/datasources/order_local_datasource.dart'
     as _i303;

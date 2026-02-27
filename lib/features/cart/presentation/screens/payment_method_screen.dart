@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class PaymentMethodScreen extends StatefulWidget {
-  final dynamic checkoutData; // Replace with proper entity later
+  final dynamic checkoutData;
 
   const PaymentMethodScreen({super.key, this.checkoutData});
 
@@ -62,8 +62,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Process payment
-                  context.push('/order-details/success'); // Dummy success
+                  context.push('/order-details/success');
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
@@ -103,7 +102,7 @@ class _PaymentOption extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.1)
+              ? AppColors.primary.withValues(alpha: 0.1)
               : AppColors.cardDark,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(

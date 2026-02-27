@@ -4,7 +4,7 @@ import 'package:boucherie_express/features/onboarding/presentation/screens/splas
 import 'package:boucherie_express/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:boucherie_express/features/home/presentation/screens/main_screen.dart';
 import 'package:boucherie_express/features/cart/presentation/screens/cart_screen.dart';
-import 'package:boucherie_express/features/payment/presentation/screens/payment_method_screen.dart';
+import 'package:boucherie_express/features/cart/presentation/screens/payment_method_screen.dart';
 import 'package:boucherie_express/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/login_screen.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/signup_screen.dart';
@@ -12,11 +12,11 @@ import 'package:boucherie_express/features/auth/presentation/screens/phone_input
 import 'package:boucherie_express/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:boucherie_express/features/home/presentation/screens/product_details_screen.dart';
 import 'package:boucherie_express/features/shared/domain/entities/product.dart';
-import 'package:boucherie_express/features/checkout/presentation/screens/checkout_screen.dart';
+import 'package:boucherie_express/features/cart/presentation/screens/checkout_screen.dart';
 import 'package:boucherie_express/features/orders/domain/entities/order.dart';
 import 'package:boucherie_express/features/orders/presentation/screens/orders_screen.dart';
 import 'package:boucherie_express/features/orders/presentation/pages/order_details_page.dart';
-import 'package:boucherie_express/features/order_tracking/presentation/screens/order_tracking_screen.dart';
+import 'package:boucherie_express/features/orders/presentation/screens/order_tracking_screen.dart';
 import 'package:boucherie_express/features/profile/presentation/screens/personal_info_screen.dart';
 import 'package:boucherie_express/features/profile/presentation/screens/addresses_screen.dart';
 import 'package:boucherie_express/features/profile/presentation/screens/payment_methods_screen.dart';

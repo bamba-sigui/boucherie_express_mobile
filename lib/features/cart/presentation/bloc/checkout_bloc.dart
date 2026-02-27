@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../../cart/domain/entities/cart.dart';
+import '../../domain/entities/cart.dart';
 import '../../domain/entities/checkout.dart';
 import '../../domain/entities/delivery_address.dart';
 import '../../domain/entities/payment_method.dart';
