@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "12806183573",
+    "project_id": "boucherie-express",
+    "storage_bucket": "boucherie-express.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12806183573:android:ba8f8167a01732d217999c",
+        "android_client_info": {
+          "package_name": "com.example.boucherie_express"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "12806183573-nkfjbfucf9ailpaf6u9730th0sq1j72u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbYdN8d8Uu0qfeJsJL8--mUnNB6KEHbzg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "12806183573-nkfjbfucf9ailpaf6u9730th0sq1j72u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
