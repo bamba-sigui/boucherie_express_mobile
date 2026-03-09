@@ -11,6 +11,7 @@ def register_blueprints(app: Flask):
     from app.modules.tracking.routes import bp as tracking_bp
     from app.modules.checkout.routes import bp as checkout_bp
     from app.modules.payments.routes import bp as payments_bp
+    from app.modules.admin.routes import bp as admin_bp
 
     app.register_blueprint(products_bp)
     app.register_blueprint(categories_bp)
@@ -21,3 +22,4 @@ def register_blueprints(app: Flask):
     app.register_blueprint(tracking_bp)
     app.register_blueprint(checkout_bp)
     app.register_blueprint(payments_bp)
+    app.register_blueprint(admin_bp)

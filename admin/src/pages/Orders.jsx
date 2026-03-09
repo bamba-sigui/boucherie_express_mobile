@@ -12,7 +12,7 @@ const Orders = () => {
 
   useEffect(() => {
     getOrders()
-      .then((data) => setOrders(data.orders ?? data))
+      .then((data) => setOrders(data.data ?? []))
       .catch((e) => toast(e.message, 'error'))
       .finally(() => setLoading(false))
   }, [])

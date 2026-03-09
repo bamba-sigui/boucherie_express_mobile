@@ -11,7 +11,7 @@ const Users = () => {
 
   useEffect(() => {
     getUsers()
-      .then((data) => setUsers(data.users ?? data))
+      .then((data) => setUsers(data.data ?? []))
       .catch((e) => toast(e.message, 'error'))
       .finally(() => setLoading(false))
   }, [])

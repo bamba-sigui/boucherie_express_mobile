@@ -14,7 +14,7 @@ const Products = () => {
   const load = () => {
     setLoading(true)
     getProducts()
-      .then((data) => setProducts(data.products ?? data))
+      .then((data) => setProducts(data.data ?? []))
       .catch((e) => toast(e.message, 'error'))
       .finally(() => setLoading(false))
   }
