@@ -39,23 +39,21 @@ import '../../features/cart/data/datasources/cart_local_datasource.dart'
     as _i339;
 import '../../features/cart/data/repositories/cart_repository_impl.dart'
     as _i642;
+import '../../features/cart/data/repositories/checkout_repository_impl.dart'
+    as _i763;
 import '../../features/cart/domain/repositories/cart_repository.dart' as _i322;
+import '../../features/cart/domain/repositories/checkout_repository.dart'
+    as _i29;
 import '../../features/cart/domain/usecases/add_to_cart.dart' as _i868;
 import '../../features/cart/domain/usecases/get_cart.dart' as _i912;
+import '../../features/cart/domain/usecases/get_default_address.dart' as _i627;
+import '../../features/cart/domain/usecases/get_payment_methods.dart' as _i484;
+import '../../features/cart/domain/usecases/place_order.dart' as _i760;
 import '../../features/cart/domain/usecases/remove_from_cart.dart' as _i904;
 import '../../features/cart/domain/usecases/update_cart_item_quantity.dart'
     as _i170;
 import '../../features/cart/presentation/bloc/cart_bloc.dart' as _i517;
-import '../../features/cart/data/repositories/checkout_repository_impl.dart'
-    as _i949;
-import '../../features/cart/domain/repositories/checkout_repository.dart'
-    as _i498;
-import '../../features/cart/domain/usecases/get_default_address.dart'
-    as _i319;
-import '../../features/cart/domain/usecases/get_payment_methods.dart'
-    as _i589;
-import '../../features/cart/domain/usecases/place_order.dart' as _i1041;
-import '../../features/cart/presentation/bloc/checkout_bloc.dart' as _i909;
+import '../../features/cart/presentation/bloc/checkout_bloc.dart' as _i893;
 import '../../features/favorites/data/datasources/favorites_remote_datasource.dart'
     as _i904;
 import '../../features/favorites/data/repositories/favorites_repository_impl.dart'
@@ -66,26 +64,36 @@ import '../../features/favorites/domain/usecases/get_favorites.dart' as _i418;
 import '../../features/favorites/domain/usecases/toggle_favorite.dart' as _i189;
 import '../../features/favorites/presentation/bloc/favorites_bloc.dart'
     as _i429;
-import '../../features/home/data/repositories/filter_repository_impl.dart'
-    as _i1033;
-import '../../features/home/domain/repositories/filter_repository.dart'
-    as _i131;
-import '../../features/home/domain/usecases/apply_filter.dart' as _i530;
-import '../../features/home/domain/usecases/reset_filter.dart' as _i460;
-import '../../features/home/presentation/bloc/filter_bloc.dart' as _i1006;
 import '../../features/home/data/datasources/home_local_datasource.dart'
     as _i314;
+import '../../features/home/data/datasources/product_remote_datasource.dart'
+    as _i373;
+import '../../features/home/data/repositories/filter_repository_impl.dart'
+    as _i504;
 import '../../features/home/data/repositories/home_repository_impl.dart'
     as _i76;
+import '../../features/home/data/repositories/product_repository_impl.dart'
+    as _i1065;
+import '../../features/home/domain/repositories/filter_repository.dart'
+    as _i652;
 import '../../features/home/domain/repositories/home_repository.dart' as _i0;
+import '../../features/home/domain/repositories/product_repository.dart'
+    as _i168;
+import '../../features/home/domain/usecases/apply_filter.dart' as _i814;
+import '../../features/home/domain/usecases/get_all_products.dart' as _i18;
+import '../../features/home/domain/usecases/get_categories.dart' as _i142;
 import '../../features/home/domain/usecases/get_home_categories.dart' as _i159;
 import '../../features/home/domain/usecases/get_home_favorite_ids.dart'
     as _i884;
 import '../../features/home/domain/usecases/get_home_products.dart' as _i303;
+import '../../features/home/domain/usecases/get_product_by_id.dart' as _i331;
+import '../../features/home/domain/usecases/reset_filter.dart' as _i771;
 import '../../features/home/domain/usecases/search_home_products.dart' as _i816;
 import '../../features/home/domain/usecases/toggle_product_favorite.dart'
     as _i101;
+import '../../features/home/presentation/bloc/filter_bloc.dart' as _i539;
 import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
+import '../../features/home/presentation/bloc/product_bloc.dart' as _i856;
 import '../../features/onboarding/data/datasources/onboarding_local_datasource.dart'
     as _i804;
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart'
@@ -99,39 +107,27 @@ import '../../features/onboarding/domain/usecases/complete_onboarding.dart'
 import '../../features/onboarding/presentation/bloc/onboarding_bloc.dart'
     as _i792;
 import '../../features/onboarding/presentation/bloc/splash_bloc.dart' as _i302;
-import '../../features/orders/data/repositories/order_tracking_repository_impl.dart'
-    as _i632;
-import '../../features/orders/domain/repositories/order_tracking_repository.dart'
-    as _i578;
-import '../../features/orders/domain/usecases/get_order_tracking.dart'
-    as _i344;
-import '../../features/orders/domain/usecases/refresh_order_status.dart'
-    as _i255;
-import '../../features/orders/presentation/bloc/order_tracking_bloc.dart'
-    as _i957;
 import '../../features/orders/data/datasources/order_local_datasource.dart'
     as _i303;
 import '../../features/orders/data/datasources/order_remote_datasource.dart'
     as _i1007;
 import '../../features/orders/data/repositories/order_repository_impl.dart'
     as _i376;
+import '../../features/orders/data/repositories/order_tracking_repository_impl.dart'
+    as _i658;
 import '../../features/orders/domain/repositories/order_repository.dart'
     as _i543;
+import '../../features/orders/domain/repositories/order_tracking_repository.dart'
+    as _i264;
 import '../../features/orders/domain/usecases/create_order.dart' as _i725;
 import '../../features/orders/domain/usecases/get_order_by_id.dart' as _i43;
+import '../../features/orders/domain/usecases/get_order_tracking.dart' as _i390;
 import '../../features/orders/domain/usecases/get_user_orders.dart' as _i299;
+import '../../features/orders/domain/usecases/refresh_order_status.dart'
+    as _i804;
 import '../../features/orders/presentation/bloc/order_bloc.dart' as _i298;
-import '../../features/home/data/datasources/product_remote_datasource.dart'
-    as _i333;
-import '../../features/home/data/repositories/product_repository_impl.dart'
-    as _i764;
-import '../../features/home/domain/repositories/product_repository.dart'
-    as _i963;
-import '../../features/home/domain/usecases/get_all_products.dart' as _i910;
-import '../../features/home/domain/usecases/get_categories.dart' as _i2;
-import '../../features/home/domain/usecases/get_product_by_id.dart'
-    as _i147;
-import '../../features/home/presentation/bloc/product_bloc.dart' as _i28;
+import '../../features/orders/presentation/bloc/order_tracking_bloc.dart'
+    as _i400;
 import '../../features/profile/data/datasources/support_local_datasource.dart'
     as _i907;
 import '../../features/profile/data/repositories/address_repository_impl.dart'
@@ -168,6 +164,7 @@ import '../../features/profile/presentation/bloc/personal_info_bloc.dart'
     as _i1030;
 import '../../features/profile/presentation/bloc/profile_bloc.dart' as _i469;
 import '../../features/profile/presentation/bloc/support_bloc.dart' as _i1040;
+import '../network/api_client.dart' as _i557;
 import 'app_module.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -192,12 +189,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i974.FirebaseFirestore>(
         () => appModule.firebaseFirestore);
     gh.lazySingleton<_i457.FirebaseStorage>(() => appModule.firebaseStorage);
-    gh.lazySingleton<_i1007.OrderRemoteDataSource>(
-        () => _i1007.OrderRemoteDataSourceImpl(gh<_i974.FirebaseFirestore>()));
-    gh.lazySingleton<_i314.HomeLocalDataSource>(
-        () => _i314.HomeLocalDataSourceImpl());
-    gh.lazySingleton<_i498.CheckoutRepository>(
-        () => _i949.CheckoutRepositoryImpl());
     gh.lazySingleton<_i339.CartLocalDataSource>(
         () => _i339.CartLocalDataSourceImpl());
     gh.lazySingleton<_i327.PhoneAuthRepository>(
@@ -206,70 +197,24 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i791.PaymentMethodRepositoryImpl());
     gh.lazySingleton<_i303.OrderLocalDataSource>(
         () => _i303.OrderLocalDataSourceImpl());
-    gh.factory<_i11.AddressRepository>(() => _i49.AddressRepositoryImpl());
-    gh.lazySingleton<_i333.ProductRemoteDataSource>(
-        () => _i333.ProductRemoteDataSourceImpl(gh<_i974.FirebaseFirestore>()));
-    gh.lazySingleton<_i578.OrderTrackingRepository>(
-        () => _i632.OrderTrackingRepositoryImpl());
     gh.lazySingleton<_i322.CartRepository>(
         () => _i642.CartRepositoryImpl(gh<_i339.CartLocalDataSource>()));
-    gh.lazySingleton<_i904.FavoritesLocalDataSource>(() =>
-        _i904.FavoritesLocalDataSourceImpl(gh<_i314.HomeLocalDataSource>()));
-    gh.lazySingleton<_i161.AuthRemoteDataSource>(
-        () => _i161.AuthRemoteDataSourceImpl(
-              gh<_i59.FirebaseAuth>(),
-              gh<_i974.FirebaseFirestore>(),
-            ));
-    gh.lazySingleton<_i131.FilterRepository>(
-        () => _i1033.FilterRepositoryImpl(gh<_i314.HomeLocalDataSource>()));
     gh.lazySingleton<_i474.RequestOtp>(
         () => _i474.RequestOtp(gh<_i327.PhoneAuthRepository>()));
     gh.lazySingleton<_i152.ResendOtp>(
         () => _i152.ResendOtp(gh<_i327.PhoneAuthRepository>()));
     gh.lazySingleton<_i975.VerifyOtp>(
         () => _i975.VerifyOtp(gh<_i327.PhoneAuthRepository>()));
-    gh.lazySingleton<_i963.ProductRepository>(
-        () => _i764.ProductRepositoryImpl(gh<_i333.ProductRemoteDataSource>()));
-    gh.lazySingleton<_i910.GetAllProducts>(
-        () => _i910.GetAllProducts(gh<_i963.ProductRepository>()));
-    gh.lazySingleton<_i2.GetCategories>(
-        () => _i2.GetCategories(gh<_i963.ProductRepository>()));
-    gh.lazySingleton<_i147.GetProductById>(
-        () => _i147.GetProductById(gh<_i963.ProductRepository>()));
-    gh.factory<_i28.ProductBloc>(() => _i28.ProductBloc(
-          gh<_i910.GetAllProducts>(),
-          gh<_i2.GetCategories>(),
-        ));
-    gh.lazySingleton<_i212.FavoritesRepository>(() =>
-        _i144.FavoritesRepositoryImpl(gh<_i904.FavoritesLocalDataSource>()));
+    gh.lazySingleton<_i557.ApiClient>(
+        () => _i557.ApiClient(gh<_i59.FirebaseAuth>()));
     gh.factory<_i475.SupportRepository>(
         () => _i365.SupportRepositoryImpl(gh<_i907.SupportLocalDatasource>()));
-    gh.lazySingleton<_i0.HomeRepository>(
-        () => _i76.HomeRepositoryImpl(gh<_i314.HomeLocalDataSource>()));
-    gh.lazySingleton<_i344.GetOrderTracking>(
-        () => _i344.GetOrderTracking(gh<_i578.OrderTrackingRepository>()));
-    gh.lazySingleton<_i255.RefreshOrderStatus>(
-        () => _i255.RefreshOrderStatus(gh<_i578.OrderTrackingRepository>()));
     gh.lazySingleton<_i804.OnboardingLocalDataSource>(() =>
         _i804.OnboardingLocalDataSourceImpl(gh<_i460.SharedPreferences>()));
     gh.factory<_i186.GetFaqs>(
         () => _i186.GetFaqs(gh<_i475.SupportRepository>()));
     gh.factory<_i254.GetSupportContacts>(
         () => _i254.GetSupportContacts(gh<_i475.SupportRepository>()));
-    gh.lazySingleton<_i543.OrderRepository>(() => _i376.OrderRepositoryImpl(
-          remoteDataSource: gh<_i1007.OrderRemoteDataSource>(),
-          localDataSource: gh<_i303.OrderLocalDataSource>(),
-        ));
-    gh.lazySingleton<_i319.GetDefaultAddress>(
-        () => _i319.GetDefaultAddress(gh<_i498.CheckoutRepository>()));
-    gh.lazySingleton<_i589.GetPaymentMethods>(
-        () => _i589.GetPaymentMethods(gh<_i498.CheckoutRepository>()));
-    gh.lazySingleton<_i1041.PlaceOrder>(
-        () => _i1041.PlaceOrder(gh<_i498.CheckoutRepository>()));
-    gh.lazySingleton<_i530.ApplyFilter>(
-        () => _i530.ApplyFilter(gh<_i131.FilterRepository>()));
-    gh.lazySingleton<_i460.ResetFilter>(
-        () => _i460.ResetFilter(gh<_i131.FilterRepository>()));
     gh.lazySingleton<_i868.AddToCart>(
         () => _i868.AddToCart(gh<_i322.CartRepository>()));
     gh.lazySingleton<_i912.GetCart>(
@@ -283,6 +228,10 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i975.VerifyOtp>(),
           gh<_i152.ResendOtp>(),
         ));
+    gh.factory<_i11.AddressRepository>(
+        () => _i49.AddressRepositoryImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i904.FavoritesLocalDataSource>(
+        () => _i904.FavoritesLocalDataSourceImpl(gh<_i557.ApiClient>()));
     gh.factory<_i482.AddPaymentMethod>(
         () => _i482.AddPaymentMethod(gh<_i87.PaymentMethodRepository>()));
     gh.factory<_i24.GetPaymentMethods>(
@@ -291,10 +240,13 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i59.RemovePaymentMethod(gh<_i87.PaymentMethodRepository>()));
     gh.factory<_i7.SetDefaultPaymentMethod>(
         () => _i7.SetDefaultPaymentMethod(gh<_i87.PaymentMethodRepository>()));
-    gh.factory<_i1006.FilterBloc>(() => _i1006.FilterBloc(
-          gh<_i530.ApplyFilter>(),
-          gh<_i460.ResetFilter>(),
-        ));
+    gh.lazySingleton<_i264.OrderTrackingRepository>(
+        () => _i658.OrderTrackingRepositoryImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i161.AuthRemoteDataSource>(
+        () => _i161.AuthRemoteDataSourceImpl(
+              gh<_i59.FirebaseAuth>(),
+              gh<_i557.ApiClient>(),
+            ));
     gh.lazySingleton<_i787.AuthRepository>(
         () => _i153.AuthRepositoryImpl(gh<_i161.AuthRemoteDataSource>()));
     gh.factory<_i64.DeleteAddress>(
@@ -303,41 +255,40 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i755.GetAddresses(gh<_i11.AddressRepository>()));
     gh.factory<_i35.SetDefaultAddress>(
         () => _i35.SetDefaultAddress(gh<_i11.AddressRepository>()));
+    gh.lazySingleton<_i314.HomeLocalDataSource>(
+        () => _i314.HomeLocalDataSourceImpl(gh<_i557.ApiClient>()));
     gh.factory<_i517.CartBloc>(() => _i517.CartBloc(
           gh<_i912.GetCart>(),
           gh<_i868.AddToCart>(),
           gh<_i904.RemoveFromCart>(),
           gh<_i170.UpdateCartItemQuantity>(),
         ));
-    gh.factory<_i418.GetFavorites>(
-        () => _i418.GetFavorites(gh<_i212.FavoritesRepository>()));
-    gh.factory<_i189.RemoveFavorite>(
-        () => _i189.RemoveFavorite(gh<_i212.FavoritesRepository>()));
-    gh.lazySingleton<_i159.GetHomeCategories>(
-        () => _i159.GetHomeCategories(gh<_i0.HomeRepository>()));
-    gh.lazySingleton<_i884.GetHomeFavoriteIds>(
-        () => _i884.GetHomeFavoriteIds(gh<_i0.HomeRepository>()));
-    gh.lazySingleton<_i303.GetHomeProducts>(
-        () => _i303.GetHomeProducts(gh<_i0.HomeRepository>()));
-    gh.lazySingleton<_i816.SearchHomeProducts>(
-        () => _i816.SearchHomeProducts(gh<_i0.HomeRepository>()));
-    gh.lazySingleton<_i101.ToggleProductFavorite>(
-        () => _i101.ToggleProductFavorite(gh<_i0.HomeRepository>()));
+    gh.lazySingleton<_i29.CheckoutRepository>(
+        () => _i763.CheckoutRepositoryImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i390.GetOrderTracking>(
+        () => _i390.GetOrderTracking(gh<_i264.OrderTrackingRepository>()));
+    gh.lazySingleton<_i804.RefreshOrderStatus>(
+        () => _i804.RefreshOrderStatus(gh<_i264.OrderTrackingRepository>()));
     gh.lazySingleton<_i430.OnboardingRepository>(() =>
         _i452.OnboardingRepositoryImpl(gh<_i804.OnboardingLocalDataSource>()));
-    gh.factory<_i957.OrderTrackingBloc>(() => _i957.OrderTrackingBloc(
-          gh<_i344.GetOrderTracking>(),
-          gh<_i255.RefreshOrderStatus>(),
-        ));
-    gh.factory<_i909.CheckoutBloc>(() => _i909.CheckoutBloc(
-          gh<_i589.GetPaymentMethods>(),
-          gh<_i319.GetDefaultAddress>(),
-          gh<_i1041.PlaceOrder>(),
-        ));
+    gh.lazySingleton<_i652.FilterRepository>(
+        () => _i504.FilterRepositoryImpl(gh<_i314.HomeLocalDataSource>()));
+    gh.lazySingleton<_i627.GetDefaultAddress>(
+        () => _i627.GetDefaultAddress(gh<_i29.CheckoutRepository>()));
+    gh.lazySingleton<_i484.GetPaymentMethods>(
+        () => _i484.GetPaymentMethods(gh<_i29.CheckoutRepository>()));
+    gh.lazySingleton<_i760.PlaceOrder>(
+        () => _i760.PlaceOrder(gh<_i29.CheckoutRepository>()));
+    gh.lazySingleton<_i1007.OrderRemoteDataSource>(
+        () => _i1007.OrderRemoteDataSourceImpl(gh<_i557.ApiClient>()));
     gh.lazySingleton<_i474.CheckOnboardingStatus>(
         () => _i474.CheckOnboardingStatus(gh<_i430.OnboardingRepository>()));
     gh.lazySingleton<_i561.CompleteOnboarding>(
         () => _i561.CompleteOnboarding(gh<_i430.OnboardingRepository>()));
+    gh.lazySingleton<_i373.ProductRemoteDataSource>(
+        () => _i373.ProductRemoteDataSourceImpl(gh<_i557.ApiClient>()));
+    gh.lazySingleton<_i168.ProductRepository>(() =>
+        _i1065.ProductRepositoryImpl(gh<_i373.ProductRemoteDataSource>()));
     gh.factory<_i1040.SupportBloc>(() => _i1040.SupportBloc(
           gh<_i186.GetFaqs>(),
           gh<_i254.GetSupportContacts>(),
@@ -359,6 +310,78 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i568.SignOut(gh<_i787.AuthRepository>()));
     gh.lazySingleton<_i460.SignUpWithEmail>(
         () => _i460.SignUpWithEmail(gh<_i787.AuthRepository>()));
+    gh.lazySingleton<_i212.FavoritesRepository>(() =>
+        _i144.FavoritesRepositoryImpl(gh<_i904.FavoritesLocalDataSource>()));
+    gh.lazySingleton<_i0.HomeRepository>(
+        () => _i76.HomeRepositoryImpl(gh<_i314.HomeLocalDataSource>()));
+    gh.lazySingleton<_i543.OrderRepository>(() => _i376.OrderRepositoryImpl(
+          remoteDataSource: gh<_i1007.OrderRemoteDataSource>(),
+          localDataSource: gh<_i303.OrderLocalDataSource>(),
+        ));
+    gh.factory<_i792.OnboardingBloc>(
+        () => _i792.OnboardingBloc(gh<_i561.CompleteOnboarding>()));
+    gh.factory<_i469.ProfileBloc>(() => _i469.ProfileBloc(
+          getCurrentUser: gh<_i111.GetCurrentUser>(),
+          updateUserProfile: gh<_i901.UpdateUserProfile>(),
+          signOut: gh<_i568.SignOut>(),
+        ));
+    gh.lazySingleton<_i814.ApplyFilter>(
+        () => _i814.ApplyFilter(gh<_i652.FilterRepository>()));
+    gh.lazySingleton<_i771.ResetFilter>(
+        () => _i771.ResetFilter(gh<_i652.FilterRepository>()));
+    gh.factory<_i302.SplashBloc>(() => _i302.SplashBloc(
+          checkOnboardingStatus: gh<_i474.CheckOnboardingStatus>(),
+          getCurrentUser: gh<_i111.GetCurrentUser>(),
+        ));
+    gh.factory<_i400.OrderTrackingBloc>(() => _i400.OrderTrackingBloc(
+          gh<_i390.GetOrderTracking>(),
+          gh<_i804.RefreshOrderStatus>(),
+        ));
+    gh.factory<_i423.AddressBloc>(() => _i423.AddressBloc(
+          getAddresses: gh<_i755.GetAddresses>(),
+          setDefaultAddress: gh<_i35.SetDefaultAddress>(),
+          deleteAddress: gh<_i64.DeleteAddress>(),
+        ));
+    gh.lazySingleton<_i18.GetAllProducts>(
+        () => _i18.GetAllProducts(gh<_i168.ProductRepository>()));
+    gh.lazySingleton<_i142.GetCategories>(
+        () => _i142.GetCategories(gh<_i168.ProductRepository>()));
+    gh.lazySingleton<_i331.GetProductById>(
+        () => _i331.GetProductById(gh<_i168.ProductRepository>()));
+    gh.factory<_i418.GetFavorites>(
+        () => _i418.GetFavorites(gh<_i212.FavoritesRepository>()));
+    gh.factory<_i189.RemoveFavorite>(
+        () => _i189.RemoveFavorite(gh<_i212.FavoritesRepository>()));
+    gh.factory<_i893.CheckoutBloc>(() => _i893.CheckoutBloc(
+          gh<_i484.GetPaymentMethods>(),
+          gh<_i627.GetDefaultAddress>(),
+          gh<_i760.PlaceOrder>(),
+        ));
+    gh.lazySingleton<_i159.GetHomeCategories>(
+        () => _i159.GetHomeCategories(gh<_i0.HomeRepository>()));
+    gh.lazySingleton<_i884.GetHomeFavoriteIds>(
+        () => _i884.GetHomeFavoriteIds(gh<_i0.HomeRepository>()));
+    gh.lazySingleton<_i303.GetHomeProducts>(
+        () => _i303.GetHomeProducts(gh<_i0.HomeRepository>()));
+    gh.lazySingleton<_i816.SearchHomeProducts>(
+        () => _i816.SearchHomeProducts(gh<_i0.HomeRepository>()));
+    gh.lazySingleton<_i101.ToggleProductFavorite>(
+        () => _i101.ToggleProductFavorite(gh<_i0.HomeRepository>()));
+    gh.factory<_i797.AuthBloc>(() => _i797.AuthBloc(
+          gh<_i485.SignInWithEmail>(),
+          gh<_i460.SignUpWithEmail>(),
+          gh<_i568.SignOut>(),
+          gh<_i111.GetCurrentUser>(),
+          gh<_i497.WatchAuthChanges>(),
+        ));
+    gh.factory<_i1030.PersonalInfoBloc>(() => _i1030.PersonalInfoBloc(
+          getCurrentUser: gh<_i111.GetCurrentUser>(),
+          updateUserProfile: gh<_i901.UpdateUserProfile>(),
+        ));
+    gh.factory<_i856.ProductBloc>(() => _i856.ProductBloc(
+          gh<_i18.GetAllProducts>(),
+          gh<_i142.GetCategories>(),
+        ));
     gh.factory<_i725.CreateOrder>(
         () => _i725.CreateOrder(gh<_i543.OrderRepository>()));
     gh.factory<_i43.GetOrderById>(
@@ -370,21 +393,9 @@ extension GetItInjectableX on _i174.GetIt {
           getUserOrders: gh<_i299.GetUserOrders>(),
           getOrderById: gh<_i43.GetOrderById>(),
         ));
-    gh.factory<_i792.OnboardingBloc>(
-        () => _i792.OnboardingBloc(gh<_i561.CompleteOnboarding>()));
-    gh.factory<_i469.ProfileBloc>(() => _i469.ProfileBloc(
-          getCurrentUser: gh<_i111.GetCurrentUser>(),
-          updateUserProfile: gh<_i901.UpdateUserProfile>(),
-          signOut: gh<_i568.SignOut>(),
-        ));
-    gh.factory<_i302.SplashBloc>(() => _i302.SplashBloc(
-          checkOnboardingStatus: gh<_i474.CheckOnboardingStatus>(),
-          getCurrentUser: gh<_i111.GetCurrentUser>(),
-        ));
-    gh.factory<_i423.AddressBloc>(() => _i423.AddressBloc(
-          getAddresses: gh<_i755.GetAddresses>(),
-          setDefaultAddress: gh<_i35.SetDefaultAddress>(),
-          deleteAddress: gh<_i64.DeleteAddress>(),
+    gh.factory<_i539.FilterBloc>(() => _i539.FilterBloc(
+          gh<_i814.ApplyFilter>(),
+          gh<_i771.ResetFilter>(),
         ));
     gh.factory<_i202.HomeBloc>(() => _i202.HomeBloc(
           gh<_i303.GetHomeProducts>(),
@@ -396,17 +407,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i429.FavoritesBloc>(() => _i429.FavoritesBloc(
           gh<_i418.GetFavorites>(),
           gh<_i189.RemoveFavorite>(),
-        ));
-    gh.factory<_i797.AuthBloc>(() => _i797.AuthBloc(
-          gh<_i485.SignInWithEmail>(),
-          gh<_i460.SignUpWithEmail>(),
-          gh<_i568.SignOut>(),
-          gh<_i111.GetCurrentUser>(),
-          gh<_i497.WatchAuthChanges>(),
-        ));
-    gh.factory<_i1030.PersonalInfoBloc>(() => _i1030.PersonalInfoBloc(
-          getCurrentUser: gh<_i111.GetCurrentUser>(),
-          updateUserProfile: gh<_i901.UpdateUserProfile>(),
         ));
     return this;
   }

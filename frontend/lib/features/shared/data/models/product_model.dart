@@ -32,7 +32,7 @@ class ProductModel extends Product {
           .map((e) => e as String)
           .toList(),
       videoUrl: json['videoUrl'] as String?,
-      category: json['category'] as String,
+      category: (json['category_id'] ?? json['category']) as String,
       preparationOptions:
           (json['preparationOptions'] as List<dynamic>?)
               ?.map((e) => e as String)

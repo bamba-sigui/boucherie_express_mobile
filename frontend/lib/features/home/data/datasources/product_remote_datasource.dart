@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../shared/data/models/category_model.dart';
 import '../../../shared/data/models/product_model.dart';
 
@@ -16,20 +16,19 @@ abstract class ProductRemoteDataSource {
 
 @LazySingleton(as: ProductRemoteDataSource)
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
-  final FirebaseFirestore firestore;
+  final ApiClient apiClient;
 
-  ProductRemoteDataSourceImpl(this.firestore);
+  ProductRemoteDataSourceImpl(this.apiClient);
 
   @override
   Future<List<ProductModel>> getAllProducts() async {
     try {
-      final snapshot = await firestore
-          .collection(AppConstants.collectionProducts)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => ProductModel.fromJson({...doc.data(), 'id': doc.id}))
+      final data = await apiClient.get(ApiConstants.products);
+      return (data as List)
+          .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
           .toList();
+    } on AppException {
+      rethrow;
     } catch (e) {
       throw ServerException('Erreur lors de la récupération des produits');
     }
@@ -38,14 +37,15 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   @override
   Future<List<ProductModel>> getProductsByCategory(String categoryId) async {
     try {
-      final snapshot = await firestore
-          .collection(AppConstants.collectionProducts)
-          .where('category', isEqualTo: categoryId)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => ProductModel.fromJson({...doc.data(), 'id': doc.id}))
+      final data = await apiClient.get(
+        ApiConstants.products,
+        queryParameters: {'category': categoryId},
+      );
+      return (data as List)
+          .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
           .toList();
+    } on AppException {
+      rethrow;
     } catch (e) {
       throw ServerException('Erreur lors de la récupération des produits');
     }
@@ -54,18 +54,11 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   @override
   Future<ProductModel> getProductById(String id) async {
     try {
-      final doc = await firestore
-          .collection(AppConstants.collectionProducts)
-          .doc(id)
-          .get();
-
-      if (!doc.exists) {
-        throw NotFoundException('Produit introuvable');
-      }
-
-      return ProductModel.fromJson({...doc.data()!, 'id': doc.id});
+      final data = await apiClient.get(ApiConstants.product(id));
+      return ProductModel.fromJson(data as Map<String, dynamic>);
+    } on AppException {
+      rethrow;
     } catch (e) {
-      if (e is NotFoundException) rethrow;
       throw ServerException('Erreur lors de la récupération du produit');
     }
   }
@@ -73,21 +66,15 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   @override
   Future<List<ProductModel>> searchProducts(String query) async {
     try {
-      final snapshot = await firestore
-          .collection(AppConstants.collectionProducts)
-          .get();
-
-      final products = snapshot.docs
-          .map((doc) => ProductModel.fromJson({...doc.data(), 'id': doc.id}))
+      final data = await apiClient.get(
+        ApiConstants.products,
+        queryParameters: {'q': query},
+      );
+      return (data as List)
+          .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
           .toList();
-
-      return products
-          .where(
-            (product) =>
-                product.name.toLowerCase().contains(query.toLowerCase()) ||
-                product.description.toLowerCase().contains(query.toLowerCase()),
-          )
-          .toList();
+    } on AppException {
+      rethrow;
     } catch (e) {
       throw ServerException('Erreur lors de la recherche');
     }
@@ -96,13 +83,12 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   @override
   Future<List<CategoryModel>> getCategories() async {
     try {
-      final snapshot = await firestore
-          .collection(AppConstants.collectionCategories)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => CategoryModel.fromJson({...doc.data(), 'id': doc.id}))
+      final data = await apiClient.get(ApiConstants.categories);
+      return (data as List)
+          .map((json) => CategoryModel.fromJson(json as Map<String, dynamic>))
           .toList();
+    } on AppException {
+      rethrow;
     } catch (e) {
       throw ServerException('Erreur lors de la récupération des catégories');
     }

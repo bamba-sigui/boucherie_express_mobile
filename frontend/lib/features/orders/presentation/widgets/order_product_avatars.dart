@@ -36,9 +36,24 @@ class OrderProductAvatars extends StatelessWidget {
       avatars.add(_buildCountBadge(remaining, visibleCount));
     }
 
+    if (avatars.isEmpty) {
+      return const SizedBox(width: 32, height: 32);
+    }
+
+    final totalCount = visibleCount + (remaining > 0 ? 1 : 0);
+    final width = (totalCount - 1) * 20.0 + 32.0;
+
     return SizedBox(
+      width: width,
       height: 32,
-      child: Stack(clipBehavior: Clip.none, children: avatars),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Non-positioned child to anchor the Stack's layout
+          SizedBox(width: width, height: 32),
+          ...avatars,
+        ],
+      ),
     );
   }
 

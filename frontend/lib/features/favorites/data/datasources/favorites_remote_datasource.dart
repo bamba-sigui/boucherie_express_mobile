@@ -1,32 +1,33 @@
 import 'package:injectable/injectable.dart';
-import '../../../home/data/datasources/home_local_datasource.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../shared/data/models/product_model.dart';
 import '../../../shared/domain/entities/product.dart';
 
-/// Source de données locale pour les favoris.
-///
-/// Délègue à [HomeLocalDataSource] pour garantir une source de vérité unique
-/// partagée avec la feature Home. Prête à être remplacée par une API REST.
+/// Source de données pour les favoris via le backend API.
 abstract class FavoritesLocalDataSource {
-  /// Récupère tous les produits marqués comme favoris.
   Future<List<Product>> getFavorites();
-
-  /// Retire un produit des favoris.
   Future<void> removeFavorite(String productId);
 }
 
 @LazySingleton(as: FavoritesLocalDataSource)
 class FavoritesLocalDataSourceImpl implements FavoritesLocalDataSource {
-  final HomeLocalDataSource _homeDataSource;
+  final ApiClient _apiClient;
 
-  FavoritesLocalDataSourceImpl(this._homeDataSource);
+  FavoritesLocalDataSourceImpl(this._apiClient);
 
   @override
   Future<List<Product>> getFavorites() async {
-    return _homeDataSource.getFavoriteProducts();
+    final data = await _apiClient.get(ApiConstants.favorites);
+    return (data as List)
+        .map(
+          (json) => ProductModel.fromJson(json as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   @override
   Future<void> removeFavorite(String productId) async {
-    await _homeDataSource.toggleFavorite(productId);
+    await _apiClient.delete(ApiConstants.favorite(productId));
   }
 }

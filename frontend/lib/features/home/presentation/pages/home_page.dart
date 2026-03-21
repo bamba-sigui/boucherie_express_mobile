@@ -43,6 +43,11 @@ class HomePageState extends State<HomePage> {
     _homeBloc.add(const HomeFavoritesRefreshRequested());
   }
 
+  /// Recharger les produits et catégories depuis l'API.
+  void reloadProducts() {
+    _homeBloc.add(const HomeLoadRequested());
+  }
+
   /// Appliquer les produits filtrés depuis le FilterBottomSheet.
   void applyFilteredProducts(List<Product> products) {
     _homeBloc.add(HomeFilterApplied(products));
@@ -99,90 +104,102 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _buildLoadedContent(BuildContext context, HomeLoaded state) {
-    return CustomScrollView(
-      slivers: [
-        // ── Barre de recherche ──
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-            child: SearchBarWidget(
-              controller: _searchController,
-              onChanged: (query) {
-                if (query.isEmpty) {
-                  context.read<HomeBloc>().add(const HomeSearchCleared());
-                } else {
-                  context.read<HomeBloc>().add(HomeSearchRequested(query));
-                }
-                setState(() {}); // Refresh pour icône clear
-              },
-              onClear: () {
-                context.read<HomeBloc>().add(const HomeSearchCleared());
-                setState(() {});
-              },
-            ),
-          ),
-        ),
-
-        // ── Catégories horizontales ──
-        if (!state.isSearching)
+    return RefreshIndicator(
+      color: AppColors.primary,
+      backgroundColor: AppColors.backgroundDark,
+      onRefresh: () async {
+        _homeBloc.add(const HomeLoadRequested());
+        // Attendre que le bloc émette un nouvel état (loaded ou error)
+        await _homeBloc.stream.firstWhere(
+          (s) => s is HomeLoaded || s is HomeError,
+        );
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          // ── Barre de recherche ──
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: CategorySelector(
-                categories: state.categories,
-                selectedCategoryId: state.selectedCategoryId,
-                onCategorySelected: (categoryId) {
-                  context.read<HomeBloc>().add(
-                    HomeCategorySelected(categoryId),
-                  );
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+              child: SearchBarWidget(
+                controller: _searchController,
+                onChanged: (query) {
+                  if (query.isEmpty) {
+                    context.read<HomeBloc>().add(const HomeSearchCleared());
+                  } else {
+                    context.read<HomeBloc>().add(HomeSearchRequested(query));
+                  }
+                  setState(() {}); // Refresh pour icône clear
+                },
+                onClear: () {
+                  context.read<HomeBloc>().add(const HomeSearchCleared());
+                  setState(() {});
                 },
               ),
             ),
           ),
 
-        // ── Espacement ──
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
-
-        // ── Liste de produits ──
-        if (state.products.isEmpty)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.search_off, color: Colors.grey.shade600, size: 64),
-                  const SizedBox(height: 16),
-                  Text(
-                    state.isSearching
-                        ? 'Aucun résultat pour "${state.searchQuery}"'
-                        : 'Aucun produit disponible',
-                    style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+          // ── Catégories horizontales ──
+          if (!state.isSearching)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: CategorySelector(
+                  categories: state.categories,
+                  selectedCategoryId: state.selectedCategoryId,
+                  onCategorySelected: (categoryId) {
+                    context.read<HomeBloc>().add(
+                      HomeCategorySelected(categoryId),
+                    );
+                  },
+                ),
               ),
             ),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList.separated(
-              itemCount: state.products.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final product = state.products[index];
-                return HomeProductCard(
-                  product: product,
-                  isFavorite: state.favoriteIds.contains(product.id),
-                );
-              },
-            ),
-          ),
 
-        // ── Espacement bas pour la bottom nav ──
-        const SliverToBoxAdapter(child: SizedBox(height: 120)),
-      ],
+          // ── Espacement ──
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+
+          // ── Liste de produits ──
+          if (state.products.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, color: Colors.grey.shade600, size: 64),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.isSearching
+                          ? 'Aucun résultat pour "${state.searchQuery}"'
+                          : 'Aucun produit disponible',
+                      style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList.separated(
+                itemCount: state.products.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final product = state.products[index];
+                  return HomeProductCard(
+                    product: product,
+                    isFavorite: state.favoriteIds.contains(product.id),
+                  );
+                },
+              ),
+            ),
+
+          // ── Espacement bas pour la bottom nav ──
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+        ],
+      ),
     );
   }
 

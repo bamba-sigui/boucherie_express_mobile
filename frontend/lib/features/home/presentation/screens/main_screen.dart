@@ -16,7 +16,7 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
   final GlobalKey<HomePageState> _homeKey = GlobalKey();
   final GlobalKey<FavoritesPageState> _favoritesKey = GlobalKey();
@@ -39,6 +39,26 @@ class _MainScreenState extends State<MainScreen> {
     const ProfileScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Recharger les produits au retour en foreground
+      _homeKey.currentState?.reloadProducts();
+    }
+  }
+
   void _onNavTap(int index) {
     if (index == 2) {
       // Bouton FILTRER central → ouvrir un BottomSheet de filtres
@@ -49,6 +69,7 @@ class _MainScreenState extends State<MainScreen> {
     // Synchroniser les données entre les onglets
     if (index == 0) {
       _homeKey.currentState?.refreshFavorites();
+      _homeKey.currentState?.reloadProducts();
     } else if (index == 1) {
       _favoritesKey.currentState?.reload();
     } else if (index == 3) {

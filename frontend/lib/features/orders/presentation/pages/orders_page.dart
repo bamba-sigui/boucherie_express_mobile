@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/auth_gate.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/order.dart';
 import '../bloc/order_bloc.dart';
 import '../bloc/order_event.dart';
@@ -38,7 +40,12 @@ class OrdersPageState extends State<OrdersPage> {
   @override
   void initState() {
     super.initState();
-    _orderBloc = getIt<OrderBloc>()..add(LoadUserOrders());
+    _orderBloc = getIt<OrderBloc>();
+    // Ne charger les commandes que si l'utilisateur est connecté.
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated) {
+      _orderBloc.add(LoadUserOrders());
+    }
   }
 
   @override
@@ -56,42 +63,47 @@ class OrdersPageState extends State<OrdersPage> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _orderBloc,
-      child: Scaffold(
-        backgroundColor: AppColors.backgroundDark,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              // ── Header ──
-              const OrdersHeader(),
+      child: AuthGate(
+        icon: Icons.receipt_long_outlined,
+        title: 'Connectez-vous',
+        subtitle: 'Connectez-vous pour voir vos commandes.',
+        child: Scaffold(
+          backgroundColor: AppColors.backgroundDark,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // ── Header ──
+                const OrdersHeader(),
 
-              // ── Contenu ──
-              Expanded(
-                child: BlocBuilder<OrderBloc, OrderState>(
-                  builder: (context, state) {
-                    if (state is OrderLoading) {
-                      return _buildLoadingState();
-                    }
-
-                    if (state is OrderError) {
-                      return _buildErrorState(context, state.message);
-                    }
-
-                    if (state is OrdersLoaded) {
-                      if (state.orders.isEmpty) {
-                        return _buildEmptyState();
+                // ── Contenu ──
+                Expanded(
+                  child: BlocBuilder<OrderBloc, OrderState>(
+                    builder: (context, state) {
+                      if (state is OrderLoading) {
+                        return _buildLoadingState();
                       }
-                      return _OrdersListView(
-                        orders: state.orders,
-                        onNavigateToHome: widget.onNavigateToHome,
-                      );
-                    }
 
-                    return const SizedBox.shrink();
-                  },
+                      if (state is OrderError) {
+                        return _buildErrorState(context, state.message);
+                      }
+
+                      if (state is OrdersLoaded) {
+                        if (state.orders.isEmpty) {
+                          return _buildEmptyState();
+                        }
+                        return _OrdersListView(
+                          orders: state.orders,
+                          onNavigateToHome: widget.onNavigateToHome,
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 const Login = () => {
   const { login } = useAuth()
@@ -28,67 +33,69 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="text-5xl mb-4">🥩</div>
-          <h1 className="text-white text-2xl font-bold">Boucherie Express</h1>
-          <p className="text-gray-400 mt-1 text-sm">Panneau d'administration</p>
+          <h1 className="text-2xl font-bold text-foreground">Boucherie Express</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Panneau d'administration</p>
         </div>
 
-        {/* Carte login */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
-          <h2 className="text-white font-semibold text-lg mb-6">Connexion</h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-gray-400 text-sm mb-1.5">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                required
-                autoComplete="email"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white
-                           placeholder-gray-500 focus:border-orange-500 focus:outline-none transition-colors"
-                placeholder="admin@boucherie-express.ci"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-400 text-sm mb-1.5">Mot de passe</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                autoComplete="current-password"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white
-                           placeholder-gray-500 focus:border-orange-500 focus:outline-none transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {/* Message d'erreur */}
-            {error && (
-              <div className="bg-red-900/30 border border-red-800 rounded-lg px-4 py-3 text-red-400 text-sm">
-                {error}
+        <Card>
+          <CardHeader>
+            <CardTitle>Connexion</CardTitle>
+            <CardDescription>Connectez-vous pour accéder au tableau de bord</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  autoComplete="email"
+                  placeholder="admin@boucherie-express.ci"
+                />
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-medium
-                         py-3 rounded-lg transition-colors mt-2"
-            >
-              {loading ? 'Connexion...' : 'Se connecter'}
-            </button>
-          </form>
-        </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Mot de passe</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {error && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-md px-4 py-3 text-destructive text-sm">
+                  {error}
+                </div>
+              )}
+
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Connexion...
+                  </>
+                ) : (
+                  'Se connecter'
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

@@ -1,52 +1,40 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:injectable/injectable.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/api_client.dart';
 import '../models/user_model.dart';
 
-/// Remote data source for authentication
+/// Remote data source for authentication.
+///
+/// Uses Firebase Auth for sign in/up/out (client-side) and the backend API
+/// for profile operations.
 abstract class AuthRemoteDataSource {
-  /// Get current user
   Future<UserModel?> getCurrentUser();
-
-  /// Sign in with email and password
   Future<UserModel> signInWithEmail(String email, String password);
-
-  /// Sign up with email and password
   Future<UserModel> signUpWithEmail({
     required String email,
     required String password,
     required String name,
     String? phone,
   });
-
-  /// Sign out
   Future<void> signOut();
-
-  /// Reset password
   Future<void> resetPassword(String email);
-
-  /// Update user profile
   Future<UserModel> updateUserProfile({
     String? name,
     String? phone,
     List<String>? addresses,
   });
-
-  /// Check if user is signed in
   Future<bool> isSignedIn();
-
-  /// Stream of auth state changes
   Stream<UserModel?> get authStateChanges;
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth firebaseAuth;
-  final FirebaseFirestore firestore;
+  final ApiClient apiClient;
 
-  AuthRemoteDataSourceImpl(this.firebaseAuth, this.firestore);
+  AuthRemoteDataSourceImpl(this.firebaseAuth, this.apiClient);
 
   @override
   Future<UserModel?> getCurrentUser() async {
@@ -54,16 +42,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final firebaseUser = firebaseAuth.currentUser;
       if (firebaseUser == null) return null;
 
-      final doc = await firestore
-          .collection(AppConstants.collectionUsers)
-          .doc(firebaseUser.uid)
-          .get();
-
-      if (!doc.exists) return null;
-
-      return UserModel.fromJson({...doc.data()!, 'id': firebaseUser.uid});
+      final data = await apiClient.get(ApiConstants.profile);
+      return UserModel.fromJson(data as Map<String, dynamic>);
     } catch (e) {
-      throw ServerException('Erreur lors de la récupération de l\'utilisateur');
+      throw ServerException(
+        'Erreur lors de la récupération de l\'utilisateur',
+      );
     }
   }
 
@@ -79,18 +63,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw AuthException('Échec de la connexion');
       }
 
-      final doc = await firestore
-          .collection(AppConstants.collectionUsers)
-          .doc(credential.user!.uid)
-          .get();
-
-      if (!doc.exists) {
-        throw AuthException('Utilisateur introuvable');
-      }
-
-      return UserModel.fromJson({...doc.data()!, 'id': credential.user!.uid});
+      // Fetch profile from backend API
+      final data = await apiClient.get(ApiConstants.profile);
+      return UserModel.fromJson(data as Map<String, dynamic>);
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw AuthException(_getAuthErrorMessage(e.code), e.code);
+    } on AuthException {
+      rethrow;
     } catch (e) {
       throw AuthException('Erreur lors de la connexion');
     }
@@ -113,22 +92,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw AuthException('Échec de l\'inscription');
       }
 
-      final user = UserModel(
-        id: credential.user!.uid,
-        email: email,
-        name: name,
-        phone: phone,
-        createdAt: DateTime.now(),
+      // Update profile on the backend (which creates the user document)
+      final data = await apiClient.put(
+        ApiConstants.profile,
+        data: {
+          'name': name,
+          if (phone != null) 'phone': phone,
+        },
       );
-
-      await firestore
-          .collection(AppConstants.collectionUsers)
-          .doc(user.id)
-          .set(user.toJson());
-
-      return user;
+      return UserModel.fromJson(data as Map<String, dynamic>);
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw AuthException(_getAuthErrorMessage(e.code), e.code);
+    } on AuthException {
+      rethrow;
     } catch (e) {
       throw AuthException('Erreur lors de l\'inscription');
     }
@@ -150,7 +126,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw AuthException(_getAuthErrorMessage(e.code), e.code);
     } catch (e) {
-      throw AuthException('Erreur lors de la réinitialisation du mot de passe');
+      throw AuthException(
+        'Erreur lors de la réinitialisation du mot de passe',
+      );
     }
   }
 
@@ -161,27 +139,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     List<String>? addresses,
   }) async {
     try {
-      final firebaseUser = firebaseAuth.currentUser;
-      if (firebaseUser == null) {
-        throw AuthException('Utilisateur non connecté');
-      }
-
       final updates = <String, dynamic>{};
       if (name != null) updates['name'] = name;
       if (phone != null) updates['phone'] = phone;
-      if (addresses != null) updates['addresses'] = addresses;
 
-      await firestore
-          .collection(AppConstants.collectionUsers)
-          .doc(firebaseUser.uid)
-          .update(updates);
-
-      final doc = await firestore
-          .collection(AppConstants.collectionUsers)
-          .doc(firebaseUser.uid)
-          .get();
-
-      return UserModel.fromJson({...doc.data()!, 'id': firebaseUser.uid});
+      final data = await apiClient.put(ApiConstants.profile, data: updates);
+      return UserModel.fromJson(data as Map<String, dynamic>);
     } catch (e) {
       throw AuthException('Erreur lors de la mise à jour du profil');
     }
@@ -198,14 +161,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (firebaseUser == null) return null;
 
       try {
-        final doc = await firestore
-            .collection(AppConstants.collectionUsers)
-            .doc(firebaseUser.uid)
-            .get();
-
-        if (!doc.exists) return null;
-
-        return UserModel.fromJson({...doc.data()!, 'id': firebaseUser.uid});
+        final data = await apiClient.get(ApiConstants.profile);
+        return UserModel.fromJson(data as Map<String, dynamic>);
       } catch (e) {
         return null;
       }

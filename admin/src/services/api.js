@@ -35,11 +35,33 @@ export const updateProduct = (id, body) =>
 export const deleteProduct = (id) =>
   request(`/products/${id}`, { method: 'DELETE' })
 
+// ─── Stock ────────────────────────────────────────────────────
+export const updateStock = (id, stock) =>
+  request(`/products/${id}`, { method: 'PUT', body: JSON.stringify({ stock }) })
+
+// ─── Catégories ───────────────────────────────────────────────
+export const getCategories = () => request('/categories')
+
+export const createCategory = (body) =>
+  request('/categories', { method: 'POST', body: JSON.stringify(body) })
+
+export const updateCategory = (id, body) =>
+  request(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+
+export const deleteCategory = (id) =>
+  request(`/categories/${id}`, { method: 'DELETE' })
+
 // ─── Commandes ────────────────────────────────────────────────
 export const getOrders = () => request('/admin/orders')
 
 export const updateOrderStatus = (id, status) =>
   request(`/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) })
+
+// ─── Tracking ─────────────────────────────────────────────────
+export const getTracking = (orderId) => request(`/orders/${orderId}/tracking`)
+
+export const updateTracking = (orderId, body) =>
+  request(`/orders/${orderId}/tracking`, { method: 'PUT', body: JSON.stringify(body) })
 
 // ─── Utilisateurs ─────────────────────────────────────────────
 export const getUsers = () => request('/admin/users')

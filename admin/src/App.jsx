@@ -1,70 +1,46 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
-import { ToastProvider } from './components/Toast'
 import ProtectedRoute from './components/ProtectedRoute'
-import Sidebar from './components/Sidebar'
+import AdminLayout from './components/layout/AdminLayout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
+import Categories from './pages/Categories'
+import Stock from './pages/Stock'
 import Orders from './pages/Orders'
+import Tracking from './pages/Tracking'
 import Users from './pages/Users'
 
-/** Layout principal (sidebar + contenu) pour les pages protégées */
-const AdminLayout = ({ children }) => (
-  <div className="flex h-screen bg-gray-950 overflow-hidden">
-    <Sidebar />
-    <div className="flex flex-col flex-1 overflow-hidden">
-      {children}
-    </div>
-  </div>
-)
+const pages = [
+  { path: '/', element: <Dashboard />, title: 'Dashboard' },
+  { path: '/products', element: <Products />, title: 'Produits' },
+  { path: '/categories', element: <Categories />, title: 'Catégories' },
+  { path: '/stock', element: <Stock />, title: 'Stock' },
+  { path: '/orders', element: <Orders />, title: 'Commandes' },
+  { path: '/tracking', element: <Tracking />, title: 'Livraisons' },
+  { path: '/users', element: <Users />, title: 'Clients' },
+]
 
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
-      <ToastProvider>
-        <Routes>
-          {/* Page publique */}
-          <Route path="/login" element={<Login />} />
+      <Routes>
+        <Route path="/login" element={<Login />} />
 
-          {/* Pages protégées — admin uniquement */}
+        {pages.map(({ path, element, title }) => (
           <Route
-            path="/"
+            key={path}
+            path={path}
             element={
               <ProtectedRoute>
-                <AdminLayout><Dashboard /></AdminLayout>
+                <AdminLayout title={title}>{element}</AdminLayout>
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/products"
-            element={
-              <ProtectedRoute>
-                <AdminLayout><Products /></AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <AdminLayout><Orders /></AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute>
-                <AdminLayout><Users /></AdminLayout>
-              </ProtectedRoute>
-            }
-          />
+        ))}
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </ToastProvider>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </AuthProvider>
   </BrowserRouter>
 )

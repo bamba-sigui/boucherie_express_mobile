@@ -1,5 +1,6 @@
 @echo off
 title Boucherie Express - Backend
+cd /d "%~dp0"
 
 :: Créer le venv si absent
 if not exist "venv\" (
@@ -22,9 +23,9 @@ if not exist ".env" (
     exit /b 1
 )
 
-:: Vérifier que serviceAccountKey.json existe
-if not exist "serviceAccountKey.json" (
-    echo ERREUR : serviceAccountKey.json introuvable.
+:: Vérifier que boucherie-express-firebase-adminsdk-fbsvc-6db385126f.json existe
+if not exist "boucherie-express-firebase-adminsdk-fbsvc-6db385126f.json" (
+    echo ERREUR : boucherie-express-firebase-adminsdk-fbsvc-6db385126f.json introuvable.
     echo Telecharge-le depuis Firebase Console ^> Project Settings ^> Service Accounts.
     pause
     exit /b 1

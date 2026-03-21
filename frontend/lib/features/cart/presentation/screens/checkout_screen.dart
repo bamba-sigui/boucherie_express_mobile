@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/auth_gate.dart';
 import '../../domain/entities/cart.dart';
 import '../bloc/cart_bloc.dart';
 import '../bloc/checkout_bloc.dart';
@@ -31,9 +32,14 @@ class CheckoutScreen extends StatelessWidget {
     final cartState = context.read<CartBloc>().state;
     final cart = cartState is CartLoaded ? cartState.cart : const Cart();
 
-    return BlocProvider(
-      create: (_) => getIt<CheckoutBloc>()..add(LoadCheckout(cart: cart)),
-      child: const _CheckoutView(),
+    return AuthGate(
+      icon: Icons.shopping_bag_outlined,
+      title: 'Connectez-vous',
+      subtitle: 'Connectez-vous pour finaliser votre commande.',
+      child: BlocProvider(
+        create: (_) => getIt<CheckoutBloc>()..add(LoadCheckout(cart: cart)),
+        child: const _CheckoutView(),
+      ),
     );
   }
 }

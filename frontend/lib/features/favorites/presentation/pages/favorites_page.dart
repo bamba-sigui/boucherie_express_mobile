@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/auth_gate.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/favorites_bloc.dart';
 import '../widgets/empty_favorites_content.dart';
 import '../widgets/favorite_product_card.dart';
@@ -29,8 +31,12 @@ class FavoritesPageState extends State<FavoritesPage> {
   @override
   void initState() {
     super.initState();
-    _favoritesBloc = getIt<FavoritesBloc>()
-      ..add(const FavoritesLoadRequested());
+    _favoritesBloc = getIt<FavoritesBloc>();
+    // Ne charger les favoris que si l'utilisateur est connecté.
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated) {
+      _favoritesBloc.add(const FavoritesLoadRequested());
+    }
   }
 
   @override
@@ -48,44 +54,49 @@ class FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _favoritesBloc,
-      child: Scaffold(
-        backgroundColor: AppColors.backgroundDark,
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              // ── Header ──
-              const FavoritesHeader(),
+      child: AuthGate(
+        icon: Icons.favorite_outline_rounded,
+        title: 'Connectez-vous',
+        subtitle: 'Connectez-vous pour voir vos favoris.',
+        child: Scaffold(
+          backgroundColor: AppColors.backgroundDark,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                // ── Header ──
+                const FavoritesHeader(),
 
-              // ── Contenu ──
-              Expanded(
-                child: BlocBuilder<FavoritesBloc, FavoritesState>(
-                  builder: (context, state) {
-                    if (state is FavoritesLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                          strokeWidth: 2,
-                        ),
-                      );
-                    }
-
-                    if (state is FavoritesError) {
-                      return _buildErrorState(context, state.message);
-                    }
-
-                    if (state is FavoritesLoaded) {
-                      if (state.favorites.isEmpty) {
-                        return _buildEmptyState(context);
+                // ── Contenu ──
+                Expanded(
+                  child: BlocBuilder<FavoritesBloc, FavoritesState>(
+                    builder: (context, state) {
+                      if (state is FavoritesLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                            strokeWidth: 2,
+                          ),
+                        );
                       }
-                      return _buildFavoritesList(context, state);
-                    }
 
-                    return const SizedBox.shrink();
-                  },
+                      if (state is FavoritesError) {
+                        return _buildErrorState(context, state.message);
+                      }
+
+                      if (state is FavoritesLoaded) {
+                        if (state.favorites.isEmpty) {
+                          return _buildEmptyState(context);
+                        }
+                        return _buildFavoritesList(context, state);
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,77 +1,121 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/network/api_client.dart';
 import '../../domain/entities/courier.dart';
 import '../../domain/entities/delivery_status.dart';
 import '../../domain/entities/delivery_step.dart';
 import '../../domain/entities/order_tracking.dart';
 import '../../domain/repositories/order_tracking_repository.dart';
 
-/// Implémentation mock du repository de suivi de commande.
-///
-/// Simule un délai réseau et retourne des données de test
-/// correspondant au design Stitch « Track My Order ».
+/// Implémentation du repository de suivi connectée au backend Flask.
 @LazySingleton(as: OrderTrackingRepository)
 class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
+  final ApiClient _apiClient;
+
+  OrderTrackingRepositoryImpl(this._apiClient);
+
   @override
   Future<Either<Failure, OrderTracking>> getOrderTracking(
     String orderId,
   ) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return Right(_createMockTracking(orderId));
+    try {
+      final data = await _apiClient.get(
+        ApiConstants.orderTracking(orderId),
+      );
+      return Right(_parseTracking(orderId, data as Map<String, dynamic>));
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 
   @override
   Future<Either<Failure, OrderTracking>> refreshOrderStatus(
     String orderId,
   ) async {
-    await Future.delayed(const Duration(milliseconds: 250));
-    return Right(_createMockTracking(orderId));
+    return getOrderTracking(orderId);
   }
 
-  // ── Mock data ──────────────────────────────────────────────────────────
+  OrderTracking _parseTracking(String orderId, Map<String, dynamic> data) {
+    final steps = (data['steps'] as List?)?.map((s) {
+          final map = s as Map<String, dynamic>;
+          final completed = map['completed'] as bool? ?? false;
+          final completedAt = map['completed_at'] != null
+              ? DateTime.tryParse(map['completed_at'] as String)
+              : null;
 
-  OrderTracking _createMockTracking(String orderId) {
-    final now = DateTime.now();
+          // Determine status based on completion
+          DeliveryStatus status;
+          if (completed) {
+            status = DeliveryStatus.completed;
+          } else if (completedAt == null &&
+              _isNextAfterLastCompleted(data['steps'] as List, s)) {
+            status = DeliveryStatus.active;
+          } else {
+            status = DeliveryStatus.pending;
+          }
+
+          return DeliveryStep(
+            id: map['step'] as String? ?? '',
+            label: map['step'] as String? ?? '',
+            subtitle: map['subtitle'] as String?,
+            status: status,
+            completedAt: completedAt,
+            iconName: _iconForStep(map['step'] as String? ?? ''),
+          );
+        }).toList() ??
+        [];
+
+    Courier? courier;
+    if (data['courier'] != null) {
+      final c = data['courier'] as Map<String, dynamic>;
+      courier = Courier(
+        id: c['id'] as String? ?? '',
+        name: c['name'] as String? ?? '',
+        rating: (c['rating'] as num?)?.toDouble() ?? 0,
+        vehicle: c['vehicle'] as String? ?? '',
+        phone: c['phone'] as String? ?? '',
+        photoUrl: c['photo_url'] as String? ?? '',
+      );
+    }
 
     return OrderTracking(
       orderId: orderId,
-      estimatedArrival: now.add(const Duration(minutes: 12)),
-      mapImageUrl:
-          'https://lh3.googleusercontent.com/aida-public/AB6AXuAHqWLOzjOh8PsvDws5xUEku7XFX5Ok5EQX3HyOZuKqWb3Lhc_8n1myKraLbEMCXzJuxRuqkU7RIN40PVh2PbjKsPWs2FfzyQVeuOzD59OTgdH07jcgXS4Gctwk0iOi3W9JHiIxL5LUGgJq39urbdL27hJD0CGp68-TgNPTL4oR7ajj1FtYv3lfco8kmoMnVmSjUdaZrDV3zkQt4Q7gNSH54eCsJu1soXsVu6UPKvuMoFRguWSxVyFqHJNAtQ-6D4SaYGsSXpN-Lw',
-      courier: const Courier(
-        id: 'courier_1',
-        name: 'Koffi Konan',
-        rating: 4.9,
-        vehicle: 'Yamaha TMAX',
-        phone: '+2250700000000',
-        photoUrl:
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuCw0nxpECjjVMN5Si5uy-HbacH6LgbNZ1cEXHJoL8_SqWhR-2T7wTev3VJRp_rB-c366GYuh4XpE4WHGW37hKgel7AJhrwSahZEe60tUje6trM21O5fag-DeRHp9Jcm34IHAP1jlNIwYqxzPF1KSBlVTk9GjMkxeEJWu78IXYalJ-EaSFDlPs2YEUAwU43xYGf3ayQtBRzNsq4j-vaBZWBr53YkOYW74tqjGB3U1_vdui1uHQkaoIw_IrrO34kQGjCIckTgBuw8nw',
-      ),
-      steps: [
-        DeliveryStep(
-          id: 'step_prep',
-          label: 'En préparation',
-          subtitle: 'Votre commande est prête',
-          status: DeliveryStatus.completed,
-          completedAt: now.subtract(const Duration(minutes: 25)),
-          iconName: 'restaurant',
-        ),
-        const DeliveryStep(
-          id: 'step_delivering',
-          label: 'En cours de livraison',
-          subtitle: 'Le livreur est en route',
-          status: DeliveryStatus.active,
-          iconName: 'two_wheeler',
-        ),
-        const DeliveryStep(
-          id: 'step_delivered',
-          label: 'Livrée',
-          status: DeliveryStatus.pending,
-          iconName: 'where_to_vote',
-        ),
-      ],
+      steps: steps,
+      courier: courier,
+      estimatedArrival: data['eta'] != null
+          ? DateTime.tryParse(data['eta'] as String)
+          : null,
     );
+  }
+
+  bool _isNextAfterLastCompleted(List steps, dynamic current) {
+    int lastCompletedIdx = -1;
+    for (int i = 0; i < steps.length; i++) {
+      if ((steps[i] as Map<String, dynamic>)['completed'] == true) {
+        lastCompletedIdx = i;
+      }
+    }
+    final currentIdx = steps.indexOf(current);
+    return currentIdx == lastCompletedIdx + 1;
+  }
+
+  String _iconForStep(String step) {
+    final lower = step.toLowerCase();
+    if (lower.contains('préparation') || lower.contains('reçue')) {
+      return 'restaurant';
+    }
+    if (lower.contains('livraison') || lower.contains('route')) {
+      return 'two_wheeler';
+    }
+    if (lower.contains('livrée') || lower.contains('delivered')) {
+      return 'where_to_vote';
+    }
+    return 'check_circle';
   }
 }

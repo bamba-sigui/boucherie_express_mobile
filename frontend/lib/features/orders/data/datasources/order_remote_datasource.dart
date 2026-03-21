@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:injectable/injectable.dart' hide Order;
-import '../../../../core/constants/app_constants.dart';
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/api_client.dart';
 import '../../domain/entities/order.dart';
 import '../models/order_model.dart';
 
-/// Remote data source for orders
+/// Remote data source for orders via the backend API.
 abstract class OrderRemoteDataSource {
   Future<OrderModel> createOrder(Order order);
   Future<List<OrderModel>> getUserOrders(String userId);
@@ -16,50 +16,28 @@ abstract class OrderRemoteDataSource {
 
 @LazySingleton(as: OrderRemoteDataSource)
 class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
-  final FirebaseFirestore firestore;
+  final ApiClient apiClient;
 
-  OrderRemoteDataSourceImpl(this.firestore);
+  OrderRemoteDataSourceImpl(this.apiClient);
 
   @override
   Future<OrderModel> createOrder(Order order) async {
-    try {
-      final docRef = firestore.collection(AppConstants.collectionOrders).doc();
-      final orderModel = OrderModel(
-        id: docRef.id,
-        userId: order.userId,
-        userName: order.userName,
-        userPhone: order.userPhone,
-        items: order.items,
-        totalPrice: order.totalPrice,
-        deliveryFee: order.deliveryFee,
-        totalAmount: order.totalAmount,
-        deliveryAddress: order.deliveryAddress,
-        status: order.status,
-        paymentMethod: order.paymentMethod,
-        paymentStatus: order.paymentStatus,
-        orderedAt: order.orderedAt,
-        note: order.note,
-      );
-
-      await docRef.set(orderModel.toJson());
-      return orderModel;
-    } catch (e) {
-      throw ServerException('Erreur lors de la création de la commande');
-    }
+    // Orders are created via the /checkout endpoint, not directly.
+    // This method is kept for interface compatibility.
+    throw ServerException('Utilisez le checkout pour créer une commande');
   }
 
   @override
   Future<List<OrderModel>> getUserOrders(String userId) async {
     try {
-      final snapshot = await firestore
-          .collection(AppConstants.collectionOrders)
-          .where('userId', isEqualTo: userId)
-          .orderBy('orderedAt', descending: true)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => OrderModel.fromJson({...doc.data(), 'id': doc.id}))
+      final data = await apiClient.get(ApiConstants.orders);
+      return (data as List)
+          .map(
+            (json) => OrderModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
+    } on AppException {
+      rethrow;
     } catch (e) {
       throw ServerException('Erreur lors de la récupération des commandes');
     }
@@ -68,18 +46,11 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   @override
   Future<OrderModel> getOrderById(String orderId) async {
     try {
-      final doc = await firestore
-          .collection(AppConstants.collectionOrders)
-          .doc(orderId)
-          .get();
-
-      if (!doc.exists) {
-        throw NotFoundException('Commande introuvable');
-      }
-
-      return OrderModel.fromJson({...doc.data()!, 'id': doc.id});
+      final data = await apiClient.get(ApiConstants.order(orderId));
+      return OrderModel.fromJson(data as Map<String, dynamic>);
+    } on AppException {
+      rethrow;
     } catch (e) {
-      if (e is NotFoundException) rethrow;
       throw ServerException('Erreur lors de la récupération de la commande');
     }
   }
@@ -87,10 +58,12 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   @override
   Future<void> updateOrderStatus(String orderId, OrderStatus status) async {
     try {
-      await firestore
-          .collection(AppConstants.collectionOrders)
-          .doc(orderId)
-          .update({'status': status.name});
+      await apiClient.put(
+        '${ApiConstants.order(orderId)}/status',
+        data: {'status': status.name},
+      );
+    } on AppException {
+      rethrow;
     } catch (e) {
       throw ServerException('Erreur lors de la mise à jour du statut');
     }
@@ -98,15 +71,10 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
 
   @override
   Stream<OrderModel> watchOrder(String orderId) {
-    return firestore
-        .collection(AppConstants.collectionOrders)
-        .doc(orderId)
-        .snapshots()
-        .map((doc) {
-          if (!doc.exists) {
-            throw NotFoundException('Commande introuvable');
-          }
-          return OrderModel.fromJson({...doc.data()!, 'id': doc.id});
-        });
+    // Polling-based: the caller can periodically call getOrderById instead.
+    // Real-time streaming requires WebSocket which the backend doesn't expose.
+    return Stream.periodic(const Duration(seconds: 5)).asyncMap((_) async {
+      return await getOrderById(orderId);
+    });
   }
 }

@@ -12,7 +12,7 @@ class CategoryModel extends Category {
     return CategoryModel(
       id: json['id'] as String,
       name: json['name'] as String,
-      icon: json['icon'] as String,
+      icon: json['icon'] as String? ?? '',
     );
   }
 

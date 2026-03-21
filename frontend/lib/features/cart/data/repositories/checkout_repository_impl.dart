@@ -1,52 +1,113 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/network/api_client.dart';
 import '../../domain/entities/checkout.dart';
 import '../../domain/entities/delivery_address.dart';
 import '../../domain/entities/payment_method.dart';
 import '../../domain/repositories/checkout_repository.dart';
 
-/// Implémentation mock du repository checkout.
-///
-/// Simule un délai réseau et retourne des données de test.
+/// Implémentation du repository checkout connectée au backend Flask.
 @LazySingleton(as: CheckoutRepository)
 class CheckoutRepositoryImpl implements CheckoutRepository {
+  final ApiClient _apiClient;
+
+  CheckoutRepositoryImpl(this._apiClient);
+
   @override
   Future<Either<Failure, List<PaymentMethod>>> getPaymentMethods() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    return Right(_mockPaymentMethods);
+    // Les méthodes de paiement sont définies côté client (correspondant
+    // aux méthodes supportées par le backend : orange_money, mtn_momo, wave, cash).
+    return Right(_paymentMethods);
   }
 
   @override
   Future<Either<Failure, DeliveryAddress>> getDefaultAddress() async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    try {
+      final data = await _apiClient.get(ApiConstants.addresses);
+      final addresses = data as List;
 
-    return const Right(_mockAddress);
+      if (addresses.isEmpty) {
+        return const Left(
+          NotFoundFailure('Aucune adresse enregistrée'),
+        );
+      }
+
+      // Chercher l'adresse par défaut, sinon prendre la première
+      final defaultAddr = addresses.firstWhere(
+        (a) => a['is_default'] == true,
+        orElse: () => addresses.first,
+      );
+
+      final map = defaultAddr as Map<String, dynamic>;
+      return Right(
+        DeliveryAddress(
+          id: map['id'] as String,
+          title: map['title'] as String? ?? map['label'] as String? ?? '',
+          detail: map['detail'] as String? ??
+              map['full_address'] as String? ??
+              '',
+          city: map['city'] as String? ?? '',
+        ),
+      );
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 
   @override
   Future<Either<Failure, String>> placeOrder(Checkout checkout) async {
-    // Simulate network call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final cartItems = checkout.cart.items
+          .map(
+            (item) => {
+              'product_id': item.product.id,
+              'quantity': item.quantity,
+              'option': item.preparationOption,
+            },
+          )
+          .toList();
 
-    // Return mock order ID
-    final orderId =
-        'BE-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
-    return Right(orderId);
+      final body = <String, dynamic>{
+        'cart_items': cartItems,
+        'payment_method': _mapPaymentMethodId(
+          checkout.selectedPaymentMethod?.id,
+        ),
+        if (checkout.deliveryAddress != null)
+          'address_id': checkout.deliveryAddress!.id,
+      };
+
+      final data = await _apiClient.post(ApiConstants.checkout, data: body);
+      final orderId = (data as Map<String, dynamic>)['order_id'] as String;
+      return Right(orderId);
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 
-  // ── Mock data ──────────────────────────────────────────────────────────
+  /// Map l'ID du PaymentMethod client vers la valeur attendue par le backend.
+  String _mapPaymentMethodId(String? id) {
+    switch (id) {
+      case 'orange_money':
+        return 'orange_money';
+      case 'mtn_momo':
+        return 'mtn_momo';
+      case 'wave':
+        return 'wave';
+      case 'cash':
+      default:
+        return 'cash';
+    }
+  }
 
-  static const _mockAddress = DeliveryAddress(
-    id: 'addr_1',
-    title: 'Cocody, Angré 7e Tranche',
-    detail: 'Immeuble Phoenix, Appt 4B',
-    city: 'Abidjan',
-  );
-
-  static final _mockPaymentMethods = [
+  static final _paymentMethods = [
     const PaymentMethod(
       id: 'orange_money',
       name: 'Orange Money',
@@ -79,7 +140,6 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
       name: 'Paiement à la livraison',
       description: 'Régler en espèces à la réception',
       type: PaymentMethodType.cash,
-      // No logo URL — will use a Material icon
     ),
   ];
 }

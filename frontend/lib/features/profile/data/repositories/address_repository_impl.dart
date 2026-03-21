@@ -1,96 +1,110 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/network/api_client.dart';
 import '../../domain/entities/address.dart';
 import '../../domain/repositories/address_repository.dart';
 
-/// Implémentation mock du repository d'adresses.
-///
-/// Données stockées en mémoire pour le développement.
-/// À remplacer par une datasource Firebase / API.
+/// Implémentation du repository d'adresses connectée au backend Flask.
 @Injectable(as: AddressRepository)
 class AddressRepositoryImpl implements AddressRepository {
-  final List<Address> _addresses = [
-    const Address(
-      id: 'addr_1',
-      label: 'Maison',
-      fullAddress: '12 Rue des Jardins, Cocody, Abidjan',
-      isDefault: true,
-      type: AddressType.home,
-    ),
-    const Address(
-      id: 'addr_2',
-      label: 'Bureau',
-      fullAddress: 'Immeuble CCIA, Plateau, Abidjan',
-      isDefault: false,
-      type: AddressType.work,
-    ),
-    const Address(
-      id: 'addr_3',
-      label: 'Parents',
-      fullAddress: 'Quartier Kennedy, Bouaké',
-      isDefault: false,
-      type: AddressType.other,
-    ),
-  ];
+  final ApiClient _apiClient;
+
+  AddressRepositoryImpl(this._apiClient);
 
   @override
   Future<Either<Failure, List<Address>>> getAddresses() async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    return Right(List.unmodifiable(_addresses));
+    try {
+      final data = await _apiClient.get(ApiConstants.addresses);
+      return Right(_parseAddresses(data as List));
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 
   @override
   Future<Either<Failure, List<Address>>> setDefaultAddress(
     String addressId,
   ) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    final index = _addresses.indexWhere((a) => a.id == addressId);
-    if (index == -1) {
-      return const Left(NotFoundFailure('Adresse introuvable'));
-    }
-
-    for (var i = 0; i < _addresses.length; i++) {
-      _addresses[i] = _addresses[i].copyWith(
-        isDefault: _addresses[i].id == addressId,
+    try {
+      final data = await _apiClient.put(
+        ApiConstants.addressDefault(addressId),
       );
+      return Right(_parseAddresses(data as List));
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
-
-    return Right(List.unmodifiable(_addresses));
   }
 
   @override
-  Future<Either<Failure, List<Address>>> deleteAddress(String addressId) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    final index = _addresses.indexWhere((a) => a.id == addressId);
-    if (index == -1) {
-      return const Left(NotFoundFailure('Adresse introuvable'));
+  Future<Either<Failure, List<Address>>> deleteAddress(
+    String addressId,
+  ) async {
+    try {
+      await _apiClient.delete(ApiConstants.address(addressId));
+      // Refresh the list after deletion
+      return getAddresses();
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
-
-    final wasDefault = _addresses[index].isDefault;
-    _addresses.removeAt(index);
-
-    // Si l'adresse supprimée était la défaut, on promeut la première
-    if (wasDefault && _addresses.isNotEmpty) {
-      _addresses[0] = _addresses[0].copyWith(isDefault: true);
-    }
-
-    return Right(List.unmodifiable(_addresses));
   }
 
   @override
   Future<Either<Failure, List<Address>>> addAddress(Address address) async {
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      await _apiClient.post(
+        ApiConstants.addresses,
+        data: {
+          'title': address.label,
+          'detail': address.fullAddress,
+          'city': _extractCity(address.fullAddress),
+          'is_default': address.isDefault,
+        },
+      );
+      // Refresh the list after adding
+      return getAddresses();
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 
-    final newAddress = address.copyWith(
-      id: 'addr_${DateTime.now().millisecondsSinceEpoch}',
-      isDefault: _addresses.isEmpty,
-    );
+  List<Address> _parseAddresses(List data) {
+    return data.map((json) {
+      final map = json as Map<String, dynamic>;
+      return Address(
+        id: map['id'] as String,
+        label: map['title'] as String? ?? '',
+        fullAddress: map['detail'] as String? ?? '',
+        isDefault: map['is_default'] as bool? ?? false,
+        type: _parseAddressType(map['type'] as String?),
+      );
+    }).toList();
+  }
 
-    _addresses.add(newAddress);
-    return Right(List.unmodifiable(_addresses));
+  AddressType _parseAddressType(String? type) {
+    switch (type) {
+      case 'home':
+        return AddressType.home;
+      case 'work':
+        return AddressType.work;
+      default:
+        return AddressType.other;
+    }
+  }
+
+  String _extractCity(String fullAddress) {
+    final parts = fullAddress.split(',');
+    return parts.length > 1 ? parts.last.trim() : fullAddress;
   }
 }

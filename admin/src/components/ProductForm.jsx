@@ -1,31 +1,50 @@
 import { useState, useEffect } from 'react'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { storage } from '../services/firebase'
-import { createProduct, updateProduct } from '../services/api'
-import { useToast } from './Toast'
+import { storage } from '@/services/firebase'
+import { createProduct, updateProduct, getCategories } from '@/services/api'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
+import { Loader2, ImagePlus, X } from 'lucide-react'
+import { toast } from 'sonner'
 
-/**
- * Modal formulaire — Créer ou modifier un produit.
- * Props:
- *   product  : produit à modifier (null = création)
- *   onClose  : ferme le modal
- *   onSaved  : callback après sauvegarde réussie
- */
-const ProductForm = ({ product, onClose, onSaved }) => {
-  const toast = useToast()
+const UNITS = ['kg', 'pièce', 'lot', 'barquette']
+
+const ProductForm = ({ product, open, onOpenChange, onSaved }) => {
   const isEdit = !!product
 
   const [form, setForm] = useState({
     name: product?.name ?? '',
     description: product?.description ?? '',
     price: product?.price ?? '',
-    category: product?.category ?? '',
     stock: product?.stock ?? '',
+    category_id: product?.category_id ?? '',
+    farmName: product?.farmName ?? '',
+    unit: product?.unit ?? 'kg',
+    isBio: product?.isBio ?? false,
+    isFresh: product?.isFresh ?? false,
+    is_active: product?.is_active ?? true,
   })
+  const [preparationOptions, setPreparationOptions] = useState(product?.preparationOptions ?? [])
+  const [prepInput, setPrepInput] = useState('')
+  const [categories, setCategories] = useState([])
   const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(product?.image_url ?? null)
+  const [imagePreview, setImagePreview] = useState(
+    product?.images?.[0] ?? product?.image_url ?? null,
+  )
   const [uploadProgress, setUploadProgress] = useState(0)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    getCategories()
+      .then((res) => setCategories(res.data ?? []))
+      .catch(() => {})
+  }, [])
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -50,132 +69,197 @@ const ProductForm = ({ product, onClose, onSaved }) => {
       )
     })
 
+  const handlePrepKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      const val = prepInput.trim().replace(/,$/, '')
+      if (val && !preparationOptions.includes(val)) {
+        setPreparationOptions((prev) => [...prev, val])
+      }
+      setPrepInput('')
+    }
+  }
+
+  const removePrepOption = (opt) => {
+    setPreparationOptions((prev) => prev.filter((o) => o !== opt))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      let imageUrl = product?.image_url ?? null
+      let imageUrl = product?.images?.[0] ?? product?.image_url ?? null
       if (imageFile) imageUrl = await uploadImage()
 
       const body = {
         name: form.name,
         description: form.description,
         price: parseFloat(form.price),
-        category: form.category,
+        category_id: form.category_id,
         stock: parseInt(form.stock),
-        ...(imageUrl ? { image_url: imageUrl } : {}),
+        images: imageUrl ? [imageUrl] : (product?.images ?? []),
+        preparationOptions,
+        farmName: form.farmName,
+        unit: form.unit,
+        isBio: form.isBio,
+        isFresh: form.isFresh,
+        is_active: form.is_active,
       }
 
       isEdit ? await updateProduct(product.id, body) : await createProduct(body)
-      toast(isEdit ? 'Produit modifié ✓' : 'Produit créé ✓', 'success')
+      toast.success(isEdit ? 'Produit modifié' : 'Produit créé')
       onSaved()
     } catch (err) {
-      toast(err.message, 'error')
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    /* Overlay */
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-40 p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        {/* En-tête */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800">
-          <h3 className="text-white font-semibold text-lg">
-            {isEdit ? 'Modifier le produit' : 'Nouveau produit'}
-          </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">✕</button>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? 'Modifier le produit' : 'Nouveau produit'}</DialogTitle>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Image */}
-          <div>
-            <label className="block text-gray-400 text-sm mb-2">Image du produit</label>
+          <div className="space-y-2">
+            <Label>Image du produit</Label>
             <div className="flex items-center gap-4">
               {imagePreview && (
-                <img src={imagePreview} alt="" className="w-16 h-16 rounded-lg object-cover border border-gray-700" />
+                <img src={imagePreview} alt="" className="w-16 h-16 rounded-lg object-cover border" />
               )}
-              <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 border border-gray-700 border-dashed rounded-lg px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">
-                📷 Choisir une image
+              <label className="cursor-pointer">
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <span><ImagePlus className="mr-2 h-4 w-4" />Choisir une image</span>
+                </Button>
                 <input type="file" accept="image/*" className="hidden" onChange={handleImage} />
               </label>
             </div>
             {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                <div className="h-full bg-orange-500 transition-all" style={{ width: `${uploadProgress}%` }} />
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-primary transition-all" style={{ width: `${uploadProgress}%` }} />
               </div>
             )}
           </div>
 
-          {/* Nom */}
-          <div>
-            <label className="block text-gray-400 text-sm mb-1">Nom *</label>
-            <input
-              name="name" value={form.name} onChange={handleChange} required
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 outline-none"
-              placeholder="Ex: Côtelettes d'agneau"
-            />
+          <div className="space-y-2">
+            <Label htmlFor="name">Nom *</Label>
+            <Input id="name" name="name" value={form.name} onChange={handleChange} required placeholder="Ex: Côtelettes d'agneau" />
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-gray-400 text-sm mb-1">Description</label>
-            <textarea
-              name="description" value={form.description} onChange={handleChange} rows={3}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 outline-none resize-none"
-              placeholder="Description du produit..."
-            />
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea id="description" name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Description du produit..." />
           </div>
 
-          {/* Prix + Stock */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-400 text-sm mb-1">Prix (FCFA) *</label>
-              <input
-                type="number" name="price" value={form.price} onChange={handleChange} required min="0" step="50"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 outline-none"
-                placeholder="5000"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="price">Prix (FCFA) *</Label>
+              <Input id="price" type="number" name="price" value={form.price} onChange={handleChange} required min="0" step="50" placeholder="5000" />
             </div>
-            <div>
-              <label className="block text-gray-400 text-sm mb-1">Stock *</label>
-              <input
-                type="number" name="stock" value={form.stock} onChange={handleChange} required min="0"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 outline-none"
-                placeholder="10"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="stock">Stock *</Label>
+              <Input id="stock" type="number" name="stock" value={form.stock} onChange={handleChange} required min="0" placeholder="10" />
             </div>
           </div>
 
-          {/* Catégorie */}
-          <div>
-            <label className="block text-gray-400 text-sm mb-1">Catégorie *</label>
-            <input
-              name="category" value={form.category} onChange={handleChange} required
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:border-orange-500 outline-none"
-              placeholder="Ex: Bœuf, Agneau, Poulet..."
+          {/* Catégorie - Select dynamique */}
+          <div className="space-y-2">
+            <Label>Catégorie *</Label>
+            <Select value={form.category_id} onValueChange={(val) => setForm((prev) => ({ ...prev, category_id: val }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Unité */}
+          <div className="space-y-2">
+            <Label>Unité</Label>
+            <Select value={form.unit} onValueChange={(val) => setForm((prev) => ({ ...prev, unit: val }))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {UNITS.map((u) => (
+                  <SelectItem key={u} value={u}>{u}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Ferme */}
+          <div className="space-y-2">
+            <Label htmlFor="farmName">Nom de la ferme</Label>
+            <Input id="farmName" name="farmName" value={form.farmName} onChange={handleChange} placeholder="Ex: Ferme de la vallée" />
+          </div>
+
+          {/* Options de préparation */}
+          <div className="space-y-2">
+            <Label>Options de préparation</Label>
+            <Input
+              value={prepInput}
+              onChange={(e) => setPrepInput(e.target.value)}
+              onKeyDown={handlePrepKeyDown}
+              placeholder="Taper une option puis Entrée (ex: Entier, Découpé)"
             />
+            {preparationOptions.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {preparationOptions.map((opt) => (
+                  <Badge key={opt} variant="secondary" className="cursor-pointer gap-1" onClick={() => removePrepOption(opt)}>
+                    {opt}
+                    <X className="h-3 w-3" />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button" onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 text-sm transition-colors"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit" disabled={loading}
-              className="flex-1 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-medium text-sm transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Enregistrement...' : isEdit ? 'Modifier' : 'Créer'}
-            </button>
+          {/* Checkboxes */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isBio"
+                checked={form.isBio}
+                onCheckedChange={(checked) => setForm((prev) => ({ ...prev, isBio: !!checked }))}
+              />
+              <Label htmlFor="isBio" className="cursor-pointer">Produit Bio</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isFresh"
+                checked={form.isFresh}
+                onCheckedChange={(checked) => setForm((prev) => ({ ...prev, isFresh: !!checked }))}
+              />
+              <Label htmlFor="isFresh" className="cursor-pointer">Produit Frais</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="is_active"
+                checked={form.is_active}
+                onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_active: !!checked }))}
+              />
+              <Label htmlFor="is_active" className="cursor-pointer">Actif (visible dans l'app)</Label>
+            </div>
           </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enregistrement...</> : isEdit ? 'Modifier' : 'Créer'}
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

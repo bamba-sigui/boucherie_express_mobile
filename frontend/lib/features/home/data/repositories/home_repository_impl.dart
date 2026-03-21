@@ -26,8 +26,9 @@ class HomeRepositoryImpl implements HomeRepository {
       );
       return Right(products);
     } catch (e) {
-      return const Left(
-        ServerFailure('Erreur lors du chargement des produits'),
+      print('HomeRepo.getProducts error: $e');
+      return Left(
+        ServerFailure(e.toString()),
       );
     }
   }
@@ -38,8 +39,9 @@ class HomeRepositoryImpl implements HomeRepository {
       final categories = await localDataSource.getCategories();
       return Right(categories);
     } catch (e) {
-      return const Left(
-        ServerFailure('Erreur lors du chargement des catégories'),
+      print('HomeRepo.getCategories error: $e');
+      return Left(
+        ServerFailure(e.toString()),
       );
     }
   }

@@ -8,7 +8,7 @@ class Config:
     )
     FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "boucherie-express")
     ALLOWED_ORIGINS = os.getenv(
-        "ALLOWED_ORIGINS", "http://localhost:3000"
+        "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173"
     ).split(",")
 
     # Livraison
