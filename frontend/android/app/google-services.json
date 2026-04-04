@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "12806183573-kjkf2aijhma06dqr1ou3jnb5itajjldj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.boucherie_express",
+            "certificate_hash": "00ef091cb1e0cce3a10069fa2599cd9e3ccf444c"
+          }
+        },
+        {
           "client_id": "12806183573-nkfjbfucf9ailpaf6u9730th0sq1j72u.apps.googleusercontent.com",
           "client_type": 3
         }

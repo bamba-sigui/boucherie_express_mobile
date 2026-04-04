@@ -4,7 +4,7 @@ class ApiConstants {
 
   // ── Base URL ───────────────────────────────────────────────────────────
   // Android emulator: 10.0.2.2 | iOS simulator: localhost | Device: LAN IP
-  static const String baseUrl = 'http://192.168.1.71:5000/api/v1';
+  static const String baseUrl = 'http://192.168.1.103:5000/api/v1';
 
   // ── Products ───────────────────────────────────────────────────────────
   static const String products = '/products';
@@ -16,6 +16,9 @@ class ApiConstants {
   // ── Favorites ──────────────────────────────────────────────────────────
   static const String favorites = '/favorites';
   static String favorite(String productId) => '/favorites/$productId';
+
+  // ── Auth checks (public, no token required) ────────────────────────────
+  static const String checkPhone = '/auth/check-phone';
 
   // ── Profile ────────────────────────────────────────────────────────────
   static const String profile = '/profile';

@@ -39,7 +39,7 @@ class _ProfileView extends StatelessWidget {
       body: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state is LogoutSuccess) {
-            context.go('/phone-auth');
+            context.go('/login');
           }
         },
         builder: (context, state) {
@@ -95,7 +95,7 @@ class _ProfileView extends StatelessWidget {
                       width: double.infinity,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () => context.push('/phone-auth'),
+                        onPressed: () => context.push('/login'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.backgroundDark,

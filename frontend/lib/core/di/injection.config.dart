@@ -24,6 +24,7 @@ import '../../features/auth/data/repositories/phone_auth_repository_impl.dart'
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/repositories/phone_auth_repository.dart'
     as _i327;
+import '../../features/auth/domain/usecases/check_phone_exists.dart' as _i850;
 import '../../features/auth/domain/usecases/get_current_user.dart' as _i111;
 import '../../features/auth/domain/usecases/request_otp.dart' as _i474;
 import '../../features/auth/domain/usecases/resend_otp.dart' as _i152;
@@ -32,6 +33,8 @@ import '../../features/auth/domain/usecases/sign_out.dart' as _i568;
 import '../../features/auth/domain/usecases/sign_up_with_email.dart' as _i460;
 import '../../features/auth/domain/usecases/update_user_profile.dart' as _i901;
 import '../../features/auth/domain/usecases/verify_otp.dart' as _i975;
+import '../../features/auth/domain/usecases/reset_password.dart' as _i215;
+import '../../features/auth/domain/usecases/sign_in_with_google.dart' as _i623;
 import '../../features/auth/domain/usecases/watch_auth_changes.dart' as _i497;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
 import '../../features/auth/presentation/bloc/phone_auth_bloc.dart' as _i294;
@@ -191,8 +194,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i457.FirebaseStorage>(() => appModule.firebaseStorage);
     gh.lazySingleton<_i339.CartLocalDataSource>(
         () => _i339.CartLocalDataSourceImpl());
-    gh.lazySingleton<_i327.PhoneAuthRepository>(
-        () => _i179.PhoneAuthRepositoryImpl());
     gh.factory<_i87.PaymentMethodRepository>(
         () => _i791.PaymentMethodRepositoryImpl());
     gh.lazySingleton<_i303.OrderLocalDataSource>(
@@ -223,10 +224,13 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i904.RemoveFromCart(gh<_i322.CartRepository>()));
     gh.lazySingleton<_i170.UpdateCartItemQuantity>(
         () => _i170.UpdateCartItemQuantity(gh<_i322.CartRepository>()));
+    gh.lazySingleton<_i850.CheckPhoneExists>(
+        () => _i850.CheckPhoneExists(gh<_i787.AuthRepository>()));
     gh.factory<_i294.PhoneAuthBloc>(() => _i294.PhoneAuthBloc(
           gh<_i474.RequestOtp>(),
           gh<_i975.VerifyOtp>(),
           gh<_i152.ResendOtp>(),
+          gh<_i850.CheckPhoneExists>(),
         ));
     gh.factory<_i11.AddressRepository>(
         () => _i49.AddressRepositoryImpl(gh<_i557.ApiClient>()));
@@ -249,6 +253,11 @@ extension GetItInjectableX on _i174.GetIt {
             ));
     gh.lazySingleton<_i787.AuthRepository>(
         () => _i153.AuthRepositoryImpl(gh<_i161.AuthRemoteDataSource>()));
+    gh.lazySingleton<_i327.PhoneAuthRepository>(
+        () => _i179.PhoneAuthRepositoryImpl(
+              gh<_i59.FirebaseAuth>(),
+              gh<_i161.AuthRemoteDataSource>(),
+            ));
     gh.factory<_i64.DeleteAddress>(
         () => _i64.DeleteAddress(gh<_i11.AddressRepository>()));
     gh.factory<_i755.GetAddresses>(
@@ -310,6 +319,10 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i568.SignOut(gh<_i787.AuthRepository>()));
     gh.lazySingleton<_i460.SignUpWithEmail>(
         () => _i460.SignUpWithEmail(gh<_i787.AuthRepository>()));
+    gh.lazySingleton<_i623.SignInWithGoogle>(
+        () => _i623.SignInWithGoogle(gh<_i787.AuthRepository>()));
+    gh.lazySingleton<_i215.ResetPassword>(
+        () => _i215.ResetPassword(gh<_i787.AuthRepository>()));
     gh.lazySingleton<_i212.FavoritesRepository>(() =>
         _i144.FavoritesRepositoryImpl(gh<_i904.FavoritesLocalDataSource>()));
     gh.lazySingleton<_i0.HomeRepository>(
@@ -373,6 +386,8 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i568.SignOut>(),
           gh<_i111.GetCurrentUser>(),
           gh<_i497.WatchAuthChanges>(),
+          gh<_i623.SignInWithGoogle>(),
+          gh<_i215.ResetPassword>(),
         ));
     gh.factory<_i1030.PersonalInfoBloc>(() => _i1030.PersonalInfoBloc(
           getCurrentUser: gh<_i111.GetCurrentUser>(),

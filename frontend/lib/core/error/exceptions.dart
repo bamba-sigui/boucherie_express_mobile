@@ -39,3 +39,16 @@ class ValidationException extends AppException {
 class NotFoundException extends AppException {
   NotFoundException([super.message = 'Ressource introuvable', super.code]);
 }
+
+/// Google sign-in detected a new (unregistered) user
+class NewGoogleUserException implements Exception {
+  final String email;
+  final String name;
+  final String? photoUrl;
+
+  const NewGoogleUserException({
+    required this.email,
+    required this.name,
+    this.photoUrl,
+  });
+}

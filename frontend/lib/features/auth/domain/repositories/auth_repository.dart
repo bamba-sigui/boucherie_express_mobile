@@ -34,6 +34,15 @@ abstract class AuthRepository {
   /// Check if user is signed in
   Future<Either<Failure, bool>> isSignedIn();
 
+  /// Sign in with Google
+  Future<Either<Failure, User>> signInWithGoogle();
+
+  /// Check if a phone number already has a registered account
+  Future<Either<Failure, bool>> checkPhoneExists(String phone);
+
+  /// Check if an email already has a registered account
+  Future<Either<Failure, bool>> checkEmailExists(String email);
+
   /// Stream of auth state changes
   Stream<User?> get authStateChanges;
 }

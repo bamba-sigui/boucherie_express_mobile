@@ -62,6 +62,24 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, User>> signInWithGoogle() async {
+    try {
+      final user = await remoteDataSource.signInWithGoogle();
+      return Right(user);
+    } on NewGoogleUserException catch (e) {
+      return Left(NewGoogleUserFailure(
+        email: e.email,
+        name: e.name,
+        photoUrl: e.photoUrl,
+      ));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> signOut() async {
     try {
       await remoteDataSource.signOut();
@@ -110,6 +128,26 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final isSignedIn = await remoteDataSource.isSignedIn();
       return Right(isSignedIn);
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> checkPhoneExists(String phone) async {
+    try {
+      final exists = await remoteDataSource.checkPhoneExists(phone);
+      return Right(exists);
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> checkEmailExists(String email) async {
+    try {
+      final exists = await remoteDataSource.checkEmailExists(email);
+      return Right(exists);
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
     }

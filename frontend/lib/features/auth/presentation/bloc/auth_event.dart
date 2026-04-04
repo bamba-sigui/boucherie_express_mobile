@@ -36,6 +36,18 @@ class SignUpRequested extends AuthEvent {
 
 class SignOutRequested extends AuthEvent {}
 
+class ResetPasswordRequested extends AuthEvent {
+  final String email;
+  const ResetPasswordRequested({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class SignInWithGoogleRequested extends AuthEvent {
+  const SignInWithGoogleRequested();
+}
+
 class CheckAuthStatus extends AuthEvent {}
 
 class AuthChanged extends AuthEvent {
@@ -44,4 +56,15 @@ class AuthChanged extends AuthEvent {
 
   @override
   List<Object?> get props => [user];
+}
+
+/// Vérifie l'existence du compte email avant de tenter la connexion.
+class CheckEmailAndLogin extends AuthEvent {
+  final String email;
+  final String password;
+
+  const CheckEmailAndLogin({required this.email, required this.password});
+
+  @override
+  List<Object?> get props => [email, password];
 }

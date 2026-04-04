@@ -18,7 +18,7 @@ class OtpInput extends StatefulWidget {
 
   const OtpInput({
     super.key,
-    this.length = 4,
+    this.length = 6,
     required this.onCompleted,
     this.onChanged,
     this.hasError = false,
@@ -42,6 +42,23 @@ class OtpInputState extends State<OtpInput> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNodes[0].requestFocus();
     });
+  }
+
+  @override
+  void didUpdateWidget(OtpInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.length != widget.length) {
+      for (final c in _controllers) c.dispose();
+      for (final f in _focusNodes) f.dispose();
+      _controllers = List.generate(
+        widget.length,
+        (_) => TextEditingController(),
+      );
+      _focusNodes = List.generate(widget.length, (_) => FocusNode());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focusNodes[0].requestFocus();
+      });
+    }
   }
 
   @override
@@ -97,7 +114,7 @@ class OtpInputState extends State<OtpInput> {
       children: List.generate(widget.length, (index) {
         final isLast = index == widget.length - 1;
         return Padding(
-          padding: EdgeInsets.only(right: isLast ? 0 : 16),
+          padding: EdgeInsets.only(right: isLast ? 0 : 8),
           child: _buildField(index),
         );
       }),
@@ -105,22 +122,24 @@ class OtpInputState extends State<OtpInput> {
   }
 
   Widget _buildField(int index) {
+    final isFocused = _focusNodes[index].hasFocus;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 64,
-      height: 64,
+      width: 40,
+      height: 56,
       decoration: BoxDecoration(
         color: AppColors.cardDark,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: widget.hasError
               ? AppColors.error
-              : _focusNodes[index].hasFocus
+              : isFocused
               ? AppColors.primary
               : Colors.white.withValues(alpha: .1),
-          width: _focusNodes[index].hasFocus ? 2 : 1,
+          width: 1.5,
         ),
-        boxShadow: _focusNodes[index].hasFocus
+        boxShadow: isFocused
             ? [
                 BoxShadow(
                   color: AppColors.primary.withValues(alpha: .15),
@@ -128,38 +147,48 @@ class OtpInputState extends State<OtpInput> {
                   spreadRadius: 1,
                 ),
               ]
-            : null,
+            : [],
       ),
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: (event) {
-          // Handle backspace quand le champ est vide
-          if (event is KeyDownEvent &&
-              event.logicalKey == LogicalKeyboardKey.backspace &&
-              _controllers[index].text.isEmpty &&
-              index > 0) {
-            _controllers[index - 1].clear();
-            _focusNodes[index - 1].requestFocus();
-          }
-        },
-        child: TextField(
-          controller: _controllers[index],
-          focusNode: _focusNodes[index],
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          maxLength: 1,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+      child: Center(
+        child: Focus(
+          onKeyEvent: (node, event) {
+            if (event is KeyDownEvent &&
+                event.logicalKey == LogicalKeyboardKey.backspace &&
+                _controllers[index].text.isEmpty &&
+                index > 0) {
+              _controllers[index - 1].clear();
+              _focusNodes[index - 1].requestFocus();
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          },
+          child: TextField(
+            controller: _controllers[index],
+            focusNode: _focusNodes[index],
+            keyboardType: TextInputType.number,
+            textAlign: TextAlign.center,
+            maxLength: 1,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            decoration: const InputDecoration(
+              counterText: '',
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              focusedErrorBorder: InputBorder.none,
+              filled: true,
+              fillColor: Colors.transparent,
+              isCollapsed: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+            onChanged: (value) => _onFieldChanged(index, value),
           ),
-          decoration: const InputDecoration(
-            counterText: '',
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.zero,
-          ),
-          onChanged: (value) => _onFieldChanged(index, value),
         ),
       ),
     );

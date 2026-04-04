@@ -38,3 +38,13 @@ final class RequestResendOtp extends PhoneAuthEvent {
   @override
   List<Object?> get props => [phone];
 }
+
+/// Vérifie l'existence du compte avant d'envoyer l'OTP.
+final class CheckPhoneAndLogin extends PhoneAuthEvent {
+  final String phone;
+
+  const CheckPhoneAndLogin({required this.phone});
+
+  @override
+  List<Object?> get props => [phone];
+}

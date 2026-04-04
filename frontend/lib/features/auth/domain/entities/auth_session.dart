@@ -10,7 +10,7 @@ class AuthSession extends Equatable {
   final bool isVerified;
 
   /// Longueur du code OTP.
-  static const int otpLength = 4;
+  static const int otpLength = 6;
 
   /// Cooldown de renvoi en secondes.
   static const int resendCooldownSeconds = 45;
@@ -46,7 +46,7 @@ class AuthSession extends Equatable {
     return cleaned.length == 10 && RegExp(r'^[0-9]+$').hasMatch(cleaned);
   }
 
-  /// `true` si le code OTP est complet (4 chiffres).
+  /// `true` si le code OTP est complet (6 chiffres).
   static bool isOtpComplete(String otp) {
     return otp.length == otpLength && RegExp(r'^[0-9]+$').hasMatch(otp);
   }

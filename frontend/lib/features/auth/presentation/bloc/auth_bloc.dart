@@ -4,10 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/get_current_user.dart';
+import '../../domain/usecases/reset_password.dart';
 import '../../domain/usecases/sign_in_with_email.dart';
+import '../../domain/usecases/sign_in_with_google.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
 import '../../domain/usecases/watch_auth_changes.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/usecases/usecase.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -19,6 +23,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignOut signOut;
   final GetCurrentUser getCurrentUser;
   final WatchAuthChanges watchAuthChanges;
+  final SignInWithGoogle signInWithGoogle;
+  final ResetPassword resetPassword;
   StreamSubscription<User?>? _authSubscription;
 
   AuthBloc(
@@ -27,17 +33,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.signOut,
     this.getCurrentUser,
     this.watchAuthChanges,
+    this.signInWithGoogle,
+    this.resetPassword,
   ) : super(AuthInitial()) {
+    on<CheckEmailAndLogin>(_onCheckEmailAndLogin);
     on<SignInRequested>(_onSignInRequested);
     on<SignUpRequested>(_onSignUpRequested);
     on<SignOutRequested>(_onSignOutRequested);
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<AuthChanged>(_onAuthChanged);
+    on<SignInWithGoogleRequested>(_onSignInWithGoogle);
+    on<ResetPasswordRequested>(_onResetPassword);
 
-    // Listen to auth state changes
+    // Écoute les changements d'état Firebase (email, Google, téléphone)
     _authSubscription = watchAuthChanges().listen((user) {
       add(AuthChanged(user));
     });
+  }
+
+  Future<void> _onCheckEmailAndLogin(
+    CheckEmailAndLogin event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await signInWithEmail.repository.checkEmailExists(event.email);
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (exists) {
+        if (exists) {
+          add(SignInRequested(email: event.email, password: event.password));
+        } else {
+          emit(EmailNotRegistered(event.email));
+        }
+      },
+    );
   }
 
   Future<void> _onSignInRequested(
@@ -45,11 +74,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     final result = await signInWithEmail(
       SignInParams(email: event.email, password: event.password),
     );
-
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (user) => emit(Authenticated(user)),
@@ -61,7 +88,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     final result = await signUpWithEmail(
       SignUpParams(
         email: event.email,
@@ -70,11 +96,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         phone: event.phone,
       ),
     );
-
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (user) => emit(Authenticated(user)),
     );
+  }
+
+  Future<void> _onSignInWithGoogle(
+    SignInWithGoogleRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await signInWithGoogle(NoParams());
+    result.fold(
+      (failure) {
+        if (failure is NewGoogleUserFailure) {
+          emit(GoogleNewUser(
+            email: failure.email,
+            name: failure.name,
+            photoUrl: failure.photoUrl,
+          ));
+        } else {
+          emit(AuthError(failure.message));
+        }
+      },
+      (user) => emit(Authenticated(user)),
+    );
+  }
+
+  Future<void> _onResetPassword(
+    ResetPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    await resetPassword(ResetPasswordParams(email: event.email));
+    // Pas de changement d'état : le feedback est géré dans l'UI via snackbar
   }
 
   Future<void> _onSignOutRequested(
@@ -82,9 +137,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     final result = await signOut();
-
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (_) => emit(Unauthenticated()),
@@ -96,9 +149,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     final result = await getCurrentUser();
-
     result.fold(
       (failure) => emit(Unauthenticated()),
       (user) =>

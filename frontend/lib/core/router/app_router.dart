@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:boucherie_express/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:boucherie_express/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:boucherie_express/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:boucherie_express/features/home/presentation/screens/main_screen.dart';
@@ -8,7 +10,6 @@ import 'package:boucherie_express/features/cart/presentation/screens/payment_met
 import 'package:boucherie_express/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/login_screen.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/signup_screen.dart';
-import 'package:boucherie_express/features/auth/presentation/screens/phone_input_screen.dart';
 import 'package:boucherie_express/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:boucherie_express/features/home/presentation/screens/product_details_screen.dart';
 import 'package:boucherie_express/features/shared/domain/entities/product.dart';
@@ -26,6 +27,17 @@ import 'package:boucherie_express/features/profile/presentation/pages/support_pa
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
+    redirect: (context, state) {
+      final authState = context.read<AuthBloc>().state;
+      final isAuthenticated = authState is Authenticated;
+
+      // Rediriger vers /home si déjà authentifié et on tente d'aller sur login/signup
+      final authRoutes = {'/login', '/signup', '/otp-verification'};
+      if (isAuthenticated && authRoutes.contains(state.matchedLocation)) {
+        return '/home';
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/',
@@ -55,7 +67,14 @@ class AppRouter {
       GoRoute(
         path: '/signup',
         name: 'signup',
-        builder: (context, state) => const SignupScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, String?>?;
+          return SignupScreen(
+            prefillEmail: extra?['email'],
+            prefillPhone: extra?['phone'],
+            prefillName: extra?['name'],
+          );
+        },
       ),
       GoRoute(
         path: '/details',
@@ -122,11 +141,6 @@ class AppRouter {
         path: '/support',
         name: 'support',
         builder: (context, state) => const SupportPage(),
-      ),
-      GoRoute(
-        path: '/phone-auth',
-        name: 'phone-auth',
-        builder: (context, state) => const PhoneInputScreen(),
       ),
       GoRoute(
         path: '/otp-verification',

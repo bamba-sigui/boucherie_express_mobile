@@ -1,3 +1,4 @@
+from google.cloud.firestore_v1 import FieldFilter
 from app.core.firebase import get_db
 from app.core.errors import NotFoundError
 
@@ -45,3 +46,15 @@ def update(uid: str, data: dict) -> dict:
 def update_fcm_token(uid: str, fcm_token: str):
     db = get_db()
     db.collection(COLLECTION).document(uid).update({"fcm_token": fcm_token})
+
+
+def exists_by_phone(phone: str) -> bool:
+    """Vérifie si un document utilisateur existe avec ce numéro de téléphone."""
+    docs = (
+        get_db()
+        .collection(COLLECTION)
+        .where(filter=FieldFilter("phone", "==", phone))
+        .limit(1)
+        .stream()
+    )
+    return any(True for _ in docs)

@@ -14,12 +14,14 @@ def _extract_token() -> str:
     return auth_header.split("Bearer ", 1)[1].strip()
 
 
-def _load_user_context(uid: str):
-    """Charge uid, email et role depuis Firestore dans g."""
+def _load_user_context(uid: str, decoded: dict):
+    """Charge uid, email et role depuis Firestore dans g.
+    Crée le document Firestore si c'est la première connexion."""
     g.uid = uid
 
     db = get_db()
-    user_doc = db.collection("users").document(uid).get()
+    ref = db.collection("users").document(uid)
+    user_doc = ref.get()
 
     if user_doc.exists:
         data = user_doc.to_dict()
@@ -27,7 +29,20 @@ def _load_user_context(uid: str):
         g.role = data.get("role", "user")
         g.fcm_token = data.get("fcm_token", "")
     else:
-        g.email = ""
+        # Première connexion : crée le document avec les infos Firebase
+        from google.cloud.firestore_v1 import SERVER_TIMESTAMP
+        new_user = {
+            "uid": uid,
+            "email": decoded.get("email", ""),
+            "phone": decoded.get("phone_number", ""),
+            "name": decoded.get("name", ""),
+            "role": "user",
+            "fcm_token": "",
+            "created_at": SERVER_TIMESTAMP,
+            "updated_at": SERVER_TIMESTAMP,
+        }
+        ref.set(new_user)
+        g.email = new_user["email"]
         g.role = "user"
         g.fcm_token = ""
 
@@ -39,7 +54,7 @@ def require_auth(f):
         try:
             token = _extract_token()
             decoded = verify_id_token(token)
-            _load_user_context(decoded["uid"])
+            _load_user_context(decoded["uid"], decoded)
         except UnauthorizedError:
             raise
         except firebase_auth.ExpiredIdTokenError:

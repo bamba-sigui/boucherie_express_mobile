@@ -230,7 +230,7 @@ class _CartScreenState extends State<CartScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(dialogCtx);
-              context.push('/phone-auth');
+              context.push('/login');
             },
             child: const Text(
               'SE CONNECTER',

@@ -6,7 +6,16 @@ import '../../../../core/utils/validation_utils.dart';
 import '../bloc/auth_bloc.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  final String? prefillEmail;
+  final String? prefillPhone;
+  final String? prefillName;
+
+  const SignupScreen({
+    super.key,
+    this.prefillEmail,
+    this.prefillPhone,
+    this.prefillName,
+  });
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -14,11 +23,19 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.prefillName ?? '');
+    _emailController = TextEditingController(text: widget.prefillEmail ?? '');
+    _phoneController = TextEditingController(text: widget.prefillPhone ?? '');
+  }
 
   @override
   void dispose() {
@@ -40,6 +57,7 @@ class _SignupScreenState extends State<SignupScreen> {
             SnackBar(
               content: Text(state.message),
               backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -77,7 +95,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Full Name
+                  // Nom complet
                   const Text(
                     'Nom complet',
                     style: TextStyle(
@@ -120,7 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Phone
+                  // Téléphone
                   const Text(
                     'Téléphone',
                     style: TextStyle(
@@ -141,7 +159,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Password
+                  // Mot de passe
                   const Text(
                     'Mot de passe',
                     style: TextStyle(
@@ -166,22 +184,22 @@ class _SignupScreenState extends State<SignupScreen> {
                               : Icons.visibility_outlined,
                           size: 20,
                         ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
+                        onPressed: () =>
+                            setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                   ),
                   const SizedBox(height: 32),
 
-                  // Signup Button
+                  // Bouton S'inscrire
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (context, state) {
+                      final isLoading = state is AuthLoading;
                       return SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
-                          onPressed: state is AuthLoading
+                          onPressed: isLoading
                               ? null
                               : () {
                                   if (_formKey.currentState!.validate()) {
@@ -195,9 +213,14 @@ class _SignupScreenState extends State<SignupScreen> {
                                     );
                                   }
                                 },
-                          child: state is AuthLoading
-                              ? const CircularProgressIndicator(
-                                  color: AppColors.backgroundDark,
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: AppColors.backgroundDark,
+                                  ),
                                 )
                               : const Text(
                                   "S'inscrire",
@@ -213,17 +236,25 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   const SizedBox(height: 32),
 
-                  // Login link
+                  // Lien connexion
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
                         "Vous avez déjà un compte ?",
-                        style: TextStyle(color: AppColors.textGrey),
+                        style: TextStyle(color: AppColors.textGrey, fontSize: 12),
                       ),
                       TextButton(
                         onPressed: () => context.pop(),
-                        child: const Text('Connectez-vous'),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Connectez-vous',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                     ],
                   ),

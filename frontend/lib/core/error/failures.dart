@@ -45,6 +45,22 @@ class PermissionFailure extends Failure {
   const PermissionFailure([super.message = 'Permission refusée']);
 }
 
+/// Google sign-in detected a new (unregistered) user
+class NewGoogleUserFailure extends Failure {
+  final String email;
+  final String name;
+  final String? photoUrl;
+
+  const NewGoogleUserFailure({
+    required this.email,
+    required this.name,
+    this.photoUrl,
+  }) : super('Nouvel utilisateur Google');
+
+  @override
+  List<Object?> get props => [message, email, name, photoUrl];
+}
+
 /// Unknown/Unexpected failures
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure([

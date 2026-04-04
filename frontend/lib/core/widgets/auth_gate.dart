@@ -111,7 +111,7 @@ class _LoginPrompt extends StatelessWidget {
 
               // Lien « Créer un compte »
               GestureDetector(
-                onTap: () => context.push('/signup'),
+                onTap: () => context.push('/login'),
                 child: Text(
                   'Créer un compte',
                   style: TextStyle(

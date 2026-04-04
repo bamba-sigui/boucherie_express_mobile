@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/user.dart';
+import '../../domain/usecases/check_phone_exists.dart';
 import '../../domain/usecases/request_otp.dart';
 import '../../domain/usecases/resend_otp.dart';
 import '../../domain/usecases/verify_otp.dart';
@@ -19,12 +20,15 @@ class PhoneAuthBloc extends Bloc<PhoneAuthEvent, PhoneAuthState> {
   final RequestOtp requestOtpUseCase;
   final VerifyOtp verifyOtpUseCase;
   final ResendOtp resendOtpUseCase;
+  final CheckPhoneExists checkPhoneExistsUseCase;
 
   PhoneAuthBloc(
     this.requestOtpUseCase,
     this.verifyOtpUseCase,
     this.resendOtpUseCase,
+    this.checkPhoneExistsUseCase,
   ) : super(PhoneAuthInitial()) {
+    on<CheckPhoneAndLogin>(_onCheckPhoneAndLogin);
     on<SubmitPhoneNumber>(_onSubmitPhone);
     on<SubmitOtp>(_onSubmitOtp);
     on<RequestResendOtp>(_onResendOtp);
@@ -41,6 +45,28 @@ class PhoneAuthBloc extends Bloc<PhoneAuthEvent, PhoneAuthState> {
   }
 
   // ── Handlers ──────────────────────────────────────────────────────────
+
+  Future<void> _onCheckPhoneAndLogin(
+    CheckPhoneAndLogin event,
+    Emitter<PhoneAuthState> emit,
+  ) async {
+    emit(PhoneChecking());
+
+    final result = await checkPhoneExistsUseCase(
+      CheckPhoneParams(phone: event.phone),
+    );
+
+    result.fold(
+      (failure) => emit(PhoneAuthError(message: failure.message)),
+      (exists) {
+        if (exists) {
+          add(SubmitPhoneNumber(phone: event.phone));
+        } else {
+          emit(PhoneNotRegistered(phone: event.phone));
+        }
+      },
+    );
+  }
 
   Future<void> _onSubmitPhone(
     SubmitPhoneNumber event,

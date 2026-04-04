@@ -6,6 +6,15 @@ from . import service
 bp = Blueprint("users", __name__, url_prefix="/api/v1")
 
 
+@bp.get("/auth/check-phone")
+def check_phone():
+    """Vérifie si un numéro de téléphone est déjà enregistré (sans authentification)."""
+    phone = request.args.get("phone", "").strip()
+    if not phone:
+        return success({"exists": False})
+    return success({"exists": repository.exists_by_phone(phone)})
+
+
 @bp.get("/profile")
 @require_auth
 def get_profile():

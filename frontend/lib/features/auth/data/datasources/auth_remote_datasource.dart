@@ -1,14 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/network/api_client.dart';
 import '../models/user_model.dart';
 
-/// Remote data source for authentication.
-///
-/// Uses Firebase Auth for sign in/up/out (client-side) and the backend API
-/// for profile operations.
 abstract class AuthRemoteDataSource {
   Future<UserModel?> getCurrentUser();
   Future<UserModel> signInWithEmail(String email, String password);
@@ -18,6 +15,11 @@ abstract class AuthRemoteDataSource {
     required String name,
     String? phone,
   });
+  Future<UserModel> signInWithGoogle();
+  Future<UserModel> signInWithPhoneCredential({
+    required firebase_auth.PhoneAuthCredential credential,
+    required String phone,
+  });
   Future<void> signOut();
   Future<void> resetPassword(String email);
   Future<UserModel> updateUserProfile({
@@ -26,6 +28,8 @@ abstract class AuthRemoteDataSource {
     List<String>? addresses,
   });
   Future<bool> isSignedIn();
+  Future<bool> checkPhoneExists(String phone);
+  Future<bool> checkEmailExists(String email);
   Stream<UserModel?> get authStateChanges;
 }
 
@@ -33,6 +37,7 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth firebaseAuth;
   final ApiClient apiClient;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   AuthRemoteDataSourceImpl(this.firebaseAuth, this.apiClient);
 
@@ -45,9 +50,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final data = await apiClient.get(ApiConstants.profile);
       return UserModel.fromJson(data as Map<String, dynamic>);
     } catch (e) {
-      throw ServerException(
-        'Erreur lors de la récupération de l\'utilisateur',
-      );
+      throw ServerException('Erreur lors de la récupération de l\'utilisateur');
     }
   }
 
@@ -59,11 +62,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       );
 
-      if (credential.user == null) {
-        throw AuthException('Échec de la connexion');
-      }
+      if (credential.user == null) throw AuthException('Échec de la connexion');
 
-      // Fetch profile from backend API
       final data = await apiClient.get(ApiConstants.profile);
       return UserModel.fromJson(data as Map<String, dynamic>);
     } on firebase_auth.FirebaseAuthException catch (e) {
@@ -88,11 +88,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       );
 
-      if (credential.user == null) {
-        throw AuthException('Échec de l\'inscription');
-      }
+      if (credential.user == null) throw AuthException('Échec de l\'inscription');
 
-      // Update profile on the backend (which creates the user document)
       final data = await apiClient.put(
         ApiConstants.profile,
         data: {
@@ -111,9 +108,117 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<UserModel> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) throw AuthException('Connexion Google annulée');
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential =
+          await firebaseAuth.signInWithCredential(credential);
+      final firebaseUser = userCredential.user;
+      if (firebaseUser == null) throw AuthException('Échec de la connexion Google');
+
+      // Nouvel utilisateur → sign out et signaler pour redirection inscription
+      if (userCredential.additionalUserInfo?.isNewUser == true) {
+        await firebaseAuth.signOut();
+        throw NewGoogleUserException(
+          email: firebaseUser.email ?? googleUser.email,
+          name: firebaseUser.displayName ?? googleUser.displayName ?? '',
+          photoUrl: firebaseUser.photoURL,
+        );
+      }
+
+      final data = await apiClient.get(ApiConstants.profile);
+      return UserModel.fromJson(data as Map<String, dynamic>);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw AuthException(_getAuthErrorMessage(e.code), e.code);
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw AuthException('Erreur lors de la connexion Google');
+    }
+  }
+
+  /// Crée ou met à jour le profil backend pour les nouveaux utilisateurs
+  /// (Google, téléphone) qui n'ont pas encore de document côté serveur.
+  Future<void> _ensureBackendProfile({
+    required String name,
+    required String email,
+    String? phone,
+    String? photoUrl,
+  }) async {
+    try {
+      await apiClient.put(ApiConstants.profile, data: {
+        'name': name,
+        'email': email,
+        if (phone != null) 'phone': phone,
+        if (photoUrl != null) 'photo_url': photoUrl,
+      });
+    } catch (_) {
+      // Non-bloquant : si le profil existe déjà, l'API retournera les données
+    }
+  }
+
+  /// Appelé par PhoneAuthRepository après vérification OTP réussie.
+  /// Crée le profil backend si c'est un nouvel utilisateur téléphone.
+  @override
+  Future<UserModel> signInWithPhoneCredential({
+    required firebase_auth.PhoneAuthCredential credential,
+    required String phone,
+  }) async {
+    try {
+      final userCredential =
+          await firebaseAuth.signInWithCredential(credential);
+      final firebaseUser = userCredential.user;
+      if (firebaseUser == null) {
+        throw AuthException('Échec de la vérification du code');
+      }
+
+      if (userCredential.additionalUserInfo?.isNewUser == true) {
+        await _ensureBackendProfile(
+          name: 'Utilisateur',
+          email: firebaseUser.email ?? '',
+          phone: phone,
+        );
+      }
+
+      try {
+        final data = await apiClient.get(ApiConstants.profile);
+        return UserModel.fromJson(data as Map<String, dynamic>);
+      } on NotFoundException {
+        // Backend crée le document au prochain appel via require_auth.
+        // On retourne un modèle minimal pour ne pas bloquer la connexion.
+        return UserModel(
+          id: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          name: firebaseUser.displayName ?? 'Utilisateur',
+          createdAt: DateTime.now(),
+        );
+      }
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw AuthException(_getPhoneErrorMessage(e.code), e.code);
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw AuthException('Erreur lors de la vérification du code');
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     try {
-      await firebaseAuth.signOut();
+      await Future.wait([
+        firebaseAuth.signOut(),
+        _googleSignIn.signOut(),
+      ]);
     } catch (e) {
       throw AuthException('Erreur lors de la déconnexion');
     }
@@ -126,9 +231,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw AuthException(_getAuthErrorMessage(e.code), e.code);
     } catch (e) {
-      throw AuthException(
-        'Erreur lors de la réinitialisation du mot de passe',
-      );
+      throw AuthException('Erreur lors de la réinitialisation du mot de passe');
     }
   }
 
@@ -156,6 +259,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<bool> checkPhoneExists(String phone) async {
+    final data = await apiClient.get(
+      ApiConstants.checkPhone,
+      queryParameters: {'phone': phone},
+    );
+    return (data as Map<String, dynamic>)['exists'] as bool;
+  }
+
+  @override
+  Future<bool> checkEmailExists(String email) async {
+    final methods = await firebaseAuth.fetchSignInMethodsForEmail(email);
+    return methods.isNotEmpty;
+  }
+
+  @override
   Stream<UserModel?> get authStateChanges {
     return firebaseAuth.authStateChanges().asyncMap((firebaseUser) async {
       if (firebaseUser == null) return null;
@@ -163,7 +281,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       try {
         final data = await apiClient.get(ApiConstants.profile);
         return UserModel.fromJson(data as Map<String, dynamic>);
-      } catch (e) {
+      } on NetworkException {
+        // Backend injoignable : on garde l'utilisateur connecté avec les
+        // données Firebase disponibles pour ne pas le déconnecter inutilement.
+        return UserModel(
+          id: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          name: firebaseUser.displayName ?? 'Utilisateur',
+          photoUrl: firebaseUser.photoURL,
+          createdAt: DateTime.now(),
+        );
+      } on NotFoundException {
+        // Profil backend inexistant (nouvel utilisateur OAuth) :
+        // garder l'utilisateur connecté, le profil sera créé par le usecase.
+        return UserModel(
+          id: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          name: firebaseUser.displayName ?? 'Utilisateur',
+          photoUrl: firebaseUser.photoURL,
+          createdAt: DateTime.now(),
+        );
+      } catch (_) {
         return null;
       }
     });
@@ -180,11 +318,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       case 'invalid-email':
         return 'Email invalide';
       case 'weak-password':
-        return 'Le mot de passe est trop faible';
+        return 'Le mot de passe est trop faible (6 caractères minimum)';
       case 'user-disabled':
         return 'Ce compte a été désactivé';
+      case 'account-exists-with-different-credential':
+        return 'Un compte existe déjà avec cet email';
+      case 'invalid-credential':
+        return 'Identifiants invalides';
       default:
         return 'Une erreur s\'est produite';
+    }
+  }
+
+  String _getPhoneErrorMessage(String code) {
+    switch (code) {
+      case 'invalid-verification-code':
+        return 'Code de vérification incorrect';
+      case 'session-expired':
+        return 'Session expirée, veuillez réessayer';
+      case 'too-many-requests':
+        return 'Trop de tentatives, réessayez plus tard';
+      case 'invalid-phone-number':
+        return 'Numéro de téléphone invalide';
+      default:
+        return 'Erreur de vérification du code';
     }
   }
 }

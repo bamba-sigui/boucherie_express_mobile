@@ -58,3 +58,16 @@ final class PhoneAuthError extends PhoneAuthState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Vérification de l'existence du compte en cours.
+final class PhoneChecking extends PhoneAuthState {}
+
+/// Aucun compte trouvé pour ce numéro → rediriger vers l'inscription.
+final class PhoneNotRegistered extends PhoneAuthState {
+  final String phone;
+
+  const PhoneNotRegistered({required this.phone});
+
+  @override
+  List<Object?> get props => [phone];
+}
