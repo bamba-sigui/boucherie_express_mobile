@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -143,8 +144,16 @@ class _PersonalInfoView extends StatelessWidget {
                 // — Avatar —
                 ProfileAvatarSection(
                   photoUrl: state.user.photoUrl,
-                  onChangePhoto: () {
-                    // TODO: Implémenter le choix photo (galerie / caméra)
+                  onChangePhoto: () async {
+                    final file = await ImagePicker().pickImage(
+                      source: ImageSource.gallery,
+                      imageQuality: 80,
+                    );
+                    if (file != null && context.mounted) {
+                      context
+                          .read<PersonalInfoBloc>()
+                          .add(UploadAvatarRequested(file));
+                    }
                   },
                 ),
                 const SizedBox(height: 32),

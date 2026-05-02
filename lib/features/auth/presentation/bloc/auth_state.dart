@@ -41,6 +41,14 @@ class EmailNotRegistered extends AuthState {
   List<Object?> get props => [email];
 }
 
+/// Email de réinitialisation envoyé avec succès.
+class ResetPasswordSuccess extends AuthState {
+  final String message;
+  const ResetPasswordSuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
 /// Connexion Google → nouvel utilisateur → rediriger vers l'inscription.
 class GoogleNewUser extends AuthState {
   final String email;

@@ -157,4 +157,21 @@ class AuthRepositoryImpl implements AuthRepository {
   Stream<User?> get authStateChanges {
     return remoteDataSource.authStateChanges;
   }
+
+  @override
+  Future<void> saveFcmToken(String token) async {
+    await remoteDataSource.saveFcmToken(token);
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadAvatar(String filePath) async {
+    try {
+      final photoUrl = await remoteDataSource.uploadAvatar(filePath);
+      return Right(photoUrl);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
 }

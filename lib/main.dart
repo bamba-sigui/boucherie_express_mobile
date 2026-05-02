@@ -1,9 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/cart/data/models/cart_item_model.dart';
@@ -12,6 +14,10 @@ import 'features/favorites/presentation/bloc/favorites_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Charger le fichier d'environnement selon --dart-define=ENV=dev|staging|prod
+  const env = String.fromEnvironment('ENV', defaultValue: 'dev');
+  await dotenv.load(fileName: '.env.$env');
 
   // Initialize Firebase
   await Firebase.initializeApp();
@@ -24,6 +30,9 @@ void main() async {
 
   // Initialize dependency injection
   await configureDependencies();
+
+  // Initialize push notifications
+  await getIt<NotificationService>().initialize();
 
   runApp(
     MultiBlocProvider(

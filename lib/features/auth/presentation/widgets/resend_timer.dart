@@ -98,7 +98,9 @@ class ResendTimerState extends State<ResendTimer> {
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
                 style: TextStyle(
-                  color: _remaining > 0 ? AppColors.primary : AppColors.primary,
+                  color: _remaining > 0
+                      ? Colors.white.withValues(alpha: .3)
+                      : AppColors.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),

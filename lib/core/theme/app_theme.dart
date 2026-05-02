@@ -112,24 +112,4 @@ class AppTheme {
     );
   }
 
-  /// Light theme (optional, for future use)
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
-        secondary: AppColors.accentRed,
-        surface: Colors.white,
-        error: AppColors.error,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: Colors.black87,
-        onError: Colors.white,
-      ),
-
-      scaffoldBackgroundColor: AppColors.backgroundLight,
-    );
-  }
 }

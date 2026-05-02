@@ -67,10 +67,31 @@ class AddressRepositoryImpl implements AddressRepository {
           'title': address.label,
           'detail': address.fullAddress,
           'city': _extractCity(address.fullAddress),
+          'type': _addressTypeToString(address.type),
           'is_default': address.isDefault,
         },
       );
-      // Refresh the list after adding
+      return getAddresses();
+    } on AppException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Address>>> updateAddress(Address address) async {
+    try {
+      await _apiClient.put(
+        ApiConstants.address(address.id),
+        data: {
+          'title': address.label,
+          'detail': address.fullAddress,
+          'city': _extractCity(address.fullAddress),
+          'type': _addressTypeToString(address.type),
+          'is_default': address.isDefault,
+        },
+      );
       return getAddresses();
     } on AppException catch (e) {
       return Left(ServerFailure(e.message));
@@ -100,6 +121,17 @@ class AddressRepositoryImpl implements AddressRepository {
         return AddressType.work;
       default:
         return AddressType.other;
+    }
+  }
+
+  String _addressTypeToString(AddressType type) {
+    switch (type) {
+      case AddressType.home:
+        return 'home';
+      case AddressType.work:
+        return 'work';
+      case AddressType.other:
+        return 'other';
     }
   }
 

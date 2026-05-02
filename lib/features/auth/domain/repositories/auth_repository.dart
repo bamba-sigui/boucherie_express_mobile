@@ -45,4 +45,10 @@ abstract class AuthRepository {
 
   /// Stream of auth state changes
   Stream<User?> get authStateChanges;
+
+  /// Save FCM token to backend
+  Future<void> saveFcmToken(String token);
+
+  /// Upload avatar and return the new photo URL
+  Future<Either<Failure, String>> uploadAvatar(String filePath);
 }

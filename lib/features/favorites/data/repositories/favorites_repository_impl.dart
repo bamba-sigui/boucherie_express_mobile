@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/utils/logger.dart';
 import '../../../shared/domain/entities/product.dart';
 import '../../domain/repositories/favorites_repository.dart';
 import '../datasources/favorites_remote_datasource.dart';
@@ -22,10 +23,10 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       final favorites = await _localDataSource.getFavorites();
       return Right(favorites);
     } on AuthException catch (e) {
-      print('FavoritesRepo.getFavorites auth error: $e');
+      AppLogger.warning('FavoritesRepo.getFavorites auth error', e);
       return Left(AuthFailure(e.message));
     } catch (e) {
-      print('FavoritesRepo.getFavorites error: $e');
+      AppLogger.error('FavoritesRepo.getFavorites error', e);
       return Left(ServerFailure(e.toString()));
     }
   }
@@ -36,10 +37,10 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       await _localDataSource.removeFavorite(productId);
       return const Right(null);
     } on AuthException catch (e) {
-      print('FavoritesRepo.removeFavorite auth error: $e');
+      AppLogger.warning('FavoritesRepo.removeFavorite auth error', e);
       return Left(AuthFailure(e.message));
     } catch (e) {
-      print('FavoritesRepo.removeFavorite error: $e');
+      AppLogger.error('FavoritesRepo.removeFavorite error', e);
       return Left(ServerFailure(e.toString()));
     }
   }

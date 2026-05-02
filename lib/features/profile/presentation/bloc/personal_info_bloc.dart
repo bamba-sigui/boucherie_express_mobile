@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../auth/domain/entities/user.dart';
 import '../../../auth/domain/usecases/get_current_user.dart';
 import '../../../auth/domain/usecases/update_user_profile.dart';
+import '../../domain/usecases/upload_avatar.dart';
 
 // ─── Events ──────────────────────────────────────────────────────────
 
@@ -30,6 +34,15 @@ class FieldChanged extends PersonalInfoEvent {
 
 /// Envoie les modifications au backend.
 class SavePersonalInfo extends PersonalInfoEvent {}
+
+/// Lance l'upload de la photo de profil.
+class UploadAvatarRequested extends PersonalInfoEvent {
+  final XFile file;
+  const UploadAvatarRequested(this.file);
+
+  @override
+  List<Object?> get props => [file.path];
+}
 
 // ─── States ──────────────────────────────────────────────────────────
 
@@ -122,14 +135,17 @@ class PersonalInfoSaved extends PersonalInfoState {
 class PersonalInfoBloc extends Bloc<PersonalInfoEvent, PersonalInfoState> {
   final GetCurrentUser getCurrentUser;
   final UpdateUserProfile updateUserProfile;
+  final UploadAvatar uploadAvatar;
 
   PersonalInfoBloc({
     required this.getCurrentUser,
     required this.updateUserProfile,
+    required this.uploadAvatar,
   }) : super(PersonalInfoInitial()) {
     on<LoadPersonalInfo>(_onLoad);
     on<FieldChanged>(_onFieldChanged);
     on<SavePersonalInfo>(_onSave);
+    on<UploadAvatarRequested>(_onUploadAvatar);
   }
 
   Future<void> _onLoad(
@@ -233,6 +249,32 @@ class PersonalInfoBloc extends Bloc<PersonalInfoEvent, PersonalInfoState> {
       // Re-emit loaded state so UI doesn't stay on error
       emit(current.copyWith(isSaving: false));
     }, (updatedUser) => emit(PersonalInfoSaved(updatedUser)));
+  }
+
+  Future<void> _onUploadAvatar(
+    UploadAvatarRequested event,
+    Emitter<PersonalInfoState> emit,
+  ) async {
+    final current = state;
+    if (current is! PersonalInfoLoaded) return;
+
+    emit(current.copyWith(isSaving: true));
+
+    final result = await uploadAvatar(File(event.file.path));
+
+    result.fold(
+      (failure) {
+        emit(current.copyWith(isSaving: false));
+        emit(PersonalInfoError(failure.message));
+        emit(current.copyWith(isSaving: false));
+      },
+      (photoUrl) => emit(
+        current.copyWith(
+          user: current.user.copyWith(photoUrl: photoUrl),
+          isSaving: false,
+        ),
+      ),
+    );
   }
 
   bool _isValidEmail(String email) {

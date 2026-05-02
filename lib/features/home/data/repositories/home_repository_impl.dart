@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/utils/logger.dart';
 import '../../../shared/domain/entities/product.dart';
 import '../../domain/entities/home_category.dart';
 import '../../domain/repositories/home_repository.dart';
@@ -26,7 +27,7 @@ class HomeRepositoryImpl implements HomeRepository {
       );
       return Right(products);
     } catch (e) {
-      print('HomeRepo.getProducts error: $e');
+      AppLogger.error('HomeRepo.getProducts error', e);
       return Left(
         ServerFailure(e.toString()),
       );
@@ -39,7 +40,7 @@ class HomeRepositoryImpl implements HomeRepository {
       final categories = await localDataSource.getCategories();
       return Right(categories);
     } catch (e) {
-      print('HomeRepo.getCategories error: $e');
+      AppLogger.error('HomeRepo.getCategories error', e);
       return Left(
         ServerFailure(e.toString()),
       );

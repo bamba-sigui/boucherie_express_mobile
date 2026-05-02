@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/cart.dart';
 import '../../domain/usecases/add_to_cart.dart';
+import '../../domain/usecases/clear_cart.dart' as uc_clear;
 import '../../domain/usecases/get_cart.dart';
 import '../../domain/usecases/remove_from_cart.dart';
 import '../../domain/usecases/update_cart_item_quantity.dart' as uc;
@@ -18,12 +19,14 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   final AddToCart addToCart;
   final RemoveFromCart removeFromCart;
   final uc.UpdateCartItemQuantity updateCartItemQuantity;
+  final uc_clear.ClearCart clearCartUseCase;
 
   CartBloc(
     this.getCart,
     this.addToCart,
     this.removeFromCart,
     this.updateCartItemQuantity,
+    this.clearCartUseCase,
   ) : super(CartInitial()) {
     on<LoadCart>(_onLoadCart);
     on<AddProductToCart>(_onAddProductToCart);
@@ -91,12 +94,11 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   Future<void> _onClearCart(ClearCart event, Emitter<CartState> emit) async {
-    // Reload cart after clearing (repository handles the clear)
     emit(CartLoading());
-    final result = await getCart();
+    final result = await clearCartUseCase();
     result.fold(
       (failure) => emit(CartError(failure.message)),
-      (cart) => emit(CartLoaded(const Cart())),
+      (_) => emit(CartLoaded(const Cart())),
     );
   }
 }

@@ -216,9 +216,7 @@ class _ProfileView extends StatelessWidget {
                       ProfileMenuItem(
                         icon: Icons.settings_rounded,
                         title: 'Paramètres',
-                        onTap: () {
-                          // TODO: Navigate to settings
-                        },
+                        onTap: () => context.push('/settings'),
                       ),
                       const SizedBox(height: 32),
 

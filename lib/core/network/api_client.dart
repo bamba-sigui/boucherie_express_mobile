@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 
 import '../constants/api_constants.dart';
 import '../error/exceptions.dart';
+import '../utils/logger.dart';
 
 /// Centralized HTTP client that talks to the Flask backend.
 ///
@@ -33,16 +34,16 @@ class ApiClient {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    print('API → ${options.method} ${options.uri}');
+    AppLogger.debug('API → ${options.method} ${options.uri}');
     final user = _firebaseAuth.currentUser;
     if (user == null) {
-      print('API warning: no Firebase user — request sent without token');
+      AppLogger.warning('API: no Firebase user — request sent without token');
       handler.next(options);
       return;
     }
     final token = await user.getIdToken();
     if (token == null || token.isEmpty) {
-      print('API warning: getIdToken() returned null/empty');
+      AppLogger.warning('API: getIdToken() returned null/empty');
       handler.next(options);
       return;
     }
@@ -51,7 +52,7 @@ class ApiClient {
   }
 
   void _onError(DioException error, ErrorInterceptorHandler handler) {
-    print('API error: ${error.type} ${error.message}');
+    AppLogger.error('API error: ${error.type} ${error.message}');
     handler.next(error);
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../features/auth/domain/usecases/get_current_user.dart';
 import '../../domain/usecases/create_order.dart';
 import '../../domain/usecases/get_user_orders.dart';
 import '../../domain/usecases/get_order_by_id.dart';
@@ -11,11 +12,13 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final CreateOrder createOrder;
   final GetUserOrders getUserOrders;
   final GetOrderById getOrderById;
+  final GetCurrentUser getCurrentUser;
 
   OrderBloc({
     required this.createOrder,
     required this.getUserOrders,
     required this.getOrderById,
+    required this.getCurrentUser,
   }) : super(OrderInitial()) {
     on<CreateOrderRequested>(_onCreateOrder);
     on<LoadUserOrders>(_onLoadUserOrders);
@@ -42,8 +45,15 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     emit(OrderLoading());
 
-    // In a real app, you'd get the userId from an AuthRepository
-    final result = await getUserOrders('temp_user_id');
+    final userResult = await getCurrentUser();
+    final userId = userResult.fold((_) => null, (user) => user?.id);
+
+    if (userId == null) {
+      emit(const OrderError('Utilisateur non connecté'));
+      return;
+    }
+
+    final result = await getUserOrders(userId);
 
     result.fold(
       (failure) => emit(OrderError(failure.message)),

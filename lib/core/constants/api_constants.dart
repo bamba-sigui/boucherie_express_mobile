@@ -1,10 +1,12 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// API endpoint constants for the Flask backend.
 class ApiConstants {
   ApiConstants._();
 
   // ── Base URL ───────────────────────────────────────────────────────────
-  // Android emulator: 10.0.2.2 | iOS simulator: localhost | Device: LAN IP
-  static const String baseUrl = 'http://192.168.1.103:5000/api/v1';
+  // Chargé depuis .env.dev / .env.staging / .env.prod selon --dart-define=ENV=
+  static String get baseUrl => dotenv.env['API_BASE_URL']!;
 
   // ── Products ───────────────────────────────────────────────────────────
   static const String products = '/products';

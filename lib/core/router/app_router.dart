@@ -21,7 +21,23 @@ import 'package:boucherie_express/features/orders/presentation/screens/order_tra
 import 'package:boucherie_express/features/profile/presentation/screens/personal_info_screen.dart';
 import 'package:boucherie_express/features/profile/presentation/screens/addresses_screen.dart';
 import 'package:boucherie_express/features/profile/presentation/screens/payment_methods_screen.dart';
+import 'package:boucherie_express/features/profile/presentation/screens/settings_screen.dart';
+import 'package:boucherie_express/features/profile/presentation/screens/add_address_screen.dart';
+import 'package:boucherie_express/features/profile/presentation/screens/edit_address_screen.dart';
 import 'package:boucherie_express/features/profile/presentation/pages/support_page.dart';
+
+/// Routes qui nécessitent d'être connecté
+const _protectedRoutes = {
+  '/orders',
+  '/order-details',
+  '/order-tracking',
+  '/checkout',
+  '/favorites',
+  '/personal-info',
+  '/addresses',
+  '/payment-methods',
+  '/support',
+};
 
 /// App router configuration
 class AppRouter {
@@ -30,12 +46,22 @@ class AppRouter {
     redirect: (context, state) {
       final authState = context.read<AuthBloc>().state;
       final isAuthenticated = authState is Authenticated;
+      final location = state.matchedLocation;
 
       // Rediriger vers /home si déjà authentifié et on tente d'aller sur login/signup
       final authRoutes = {'/login', '/signup', '/otp-verification'};
-      if (isAuthenticated && authRoutes.contains(state.matchedLocation)) {
+      if (isAuthenticated && authRoutes.contains(location)) {
         return '/home';
       }
+
+      // Bloquer l'accès aux routes protégées si non connecté
+      final isProtected = _protectedRoutes.any(
+        (route) => location.startsWith(route),
+      );
+      if (isProtected && !isAuthenticated) {
+        return '/login?redirect=${Uri.encodeComponent(location)}';
+      }
+
       return null;
     },
     routes: [
@@ -141,6 +167,23 @@ class AppRouter {
         path: '/support',
         name: 'support',
         builder: (context, state) => const SupportPage(),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/addresses/add',
+        name: 'add-address',
+        builder: (context, state) => const AddAddressScreen(),
+      ),
+      GoRoute(
+        path: '/addresses/:id/edit',
+        name: 'edit-address',
+        builder: (context, state) => EditAddressScreen(
+          addressId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
         path: '/otp-verification',

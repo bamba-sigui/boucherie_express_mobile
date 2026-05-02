@@ -159,9 +159,9 @@ class _AddressesView extends StatelessWidget {
                               onSelect: () => context.read<AddressBloc>().add(
                                 SelectDefaultAddress(address.id),
                               ),
-                              onEdit: () {
-                                // TODO: Navigation vers page d'édition
-                              },
+                              onEdit: () => context.push(
+                                '/addresses/${address.id}/edit',
+                              ),
                               onDelete: () =>
                                   _showDeleteDialog(context, address.id),
                             ),
@@ -321,9 +321,7 @@ class _AddressesView extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // TODO: Navigation vers page d'ajout d'adresse
-          },
+          onTap: () => context.push('/addresses/add'),
           borderRadius: BorderRadius.circular(12),
           splashColor: Colors.white.withValues(alpha: .1),
           child: Ink(

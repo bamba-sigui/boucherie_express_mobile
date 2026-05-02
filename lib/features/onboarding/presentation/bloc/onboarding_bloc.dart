@@ -11,13 +11,8 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   final CompleteOnboarding completeOnboarding;
 
   OnboardingBloc(this.completeOnboarding) : super(const OnboardingInitial()) {
-    on<PageChanged>(_onPageChanged);
     on<SkipOnboarding>(_onSkipOnboarding);
     on<CompleteOnboardingEvent>(_onCompleteOnboarding);
-  }
-
-  void _onPageChanged(PageChanged event, Emitter<OnboardingState> emit) {
-    emit(OnboardingInitial(currentPage: event.pageIndex));
   }
 
   Future<void> _onSkipOnboarding(

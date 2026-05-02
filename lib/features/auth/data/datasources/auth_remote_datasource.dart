@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
@@ -31,6 +32,8 @@ abstract class AuthRemoteDataSource {
   Future<bool> checkPhoneExists(String phone);
   Future<bool> checkEmailExists(String email);
   Stream<UserModel?> get authStateChanges;
+  Future<void> saveFcmToken(String token);
+  Future<String> uploadAvatar(String filePath);
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
@@ -328,6 +331,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       default:
         return 'Une erreur s\'est produite';
     }
+  }
+
+  @override
+  Future<void> saveFcmToken(String token) async {
+    try {
+      await apiClient.post('/profile/fcm-token', data: {'token': token});
+    } catch (_) {
+      // Non-bloquant
+    }
+  }
+
+  @override
+  Future<String> uploadAvatar(String filePath) async {
+    final formData = FormData.fromMap({
+      'avatar': await MultipartFile.fromFile(filePath),
+    });
+    final data = await apiClient.post('/users/me/avatar', data: formData);
+    return (data as Map<String, dynamic>)['photo_url'] as String;
   }
 
   String _getPhoneErrorMessage(String code) {

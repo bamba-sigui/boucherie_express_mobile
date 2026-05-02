@@ -16,4 +16,7 @@ abstract class AddressRepository {
 
   /// Ajoute une nouvelle adresse.
   Future<Either<Failure, List<Address>>> addAddress(Address address);
+
+  /// Met à jour une adresse existante.
+  Future<Either<Failure, List<Address>>> updateAddress(Address address);
 }

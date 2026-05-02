@@ -9,6 +9,7 @@ import '../../domain/usecases/sign_in_with_email.dart';
 import '../../domain/usecases/sign_in_with_google.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
+import '../../domain/usecases/save_fcm_token.dart';
 import '../../domain/usecases/watch_auth_changes.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -25,6 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final WatchAuthChanges watchAuthChanges;
   final SignInWithGoogle signInWithGoogle;
   final ResetPassword resetPassword;
+  final SaveFcmToken saveFcmToken;
   StreamSubscription<User?>? _authSubscription;
 
   AuthBloc(
@@ -35,6 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this.watchAuthChanges,
     this.signInWithGoogle,
     this.resetPassword,
+    this.saveFcmToken,
   ) : super(AuthInitial()) {
     on<CheckEmailAndLogin>(_onCheckEmailAndLogin);
     on<SignInRequested>(_onSignInRequested);
@@ -79,7 +82,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     result.fold(
       (failure) => emit(AuthError(failure.message)),
-      (user) => emit(Authenticated(user)),
+      (user) {
+        emit(Authenticated(user));
+        saveFcmToken(); // ignore: unawaited_futures
+      },
     );
   }
 
@@ -98,7 +104,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     result.fold(
       (failure) => emit(AuthError(failure.message)),
-      (user) => emit(Authenticated(user)),
+      (user) {
+        emit(Authenticated(user));
+        saveFcmToken(); // ignore: unawaited_futures
+      },
     );
   }
 
@@ -120,7 +129,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthError(failure.message));
         }
       },
-      (user) => emit(Authenticated(user)),
+      (user) {
+        emit(Authenticated(user));
+        saveFcmToken(); // ignore: unawaited_futures
+      },
     );
   }
 
@@ -128,8 +140,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ResetPasswordRequested event,
     Emitter<AuthState> emit,
   ) async {
-    await resetPassword(ResetPasswordParams(email: event.email));
-    // Pas de changement d'état : le feedback est géré dans l'UI via snackbar
+    emit(AuthLoading());
+    final result = await resetPassword(ResetPasswordParams(email: event.email));
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (_) => emit(const ResetPasswordSuccess('Email de réinitialisation envoyé')),
+    );
   }
 
   Future<void> _onSignOutRequested(
@@ -152,8 +168,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await getCurrentUser();
     result.fold(
       (failure) => emit(Unauthenticated()),
-      (user) =>
-          user != null ? emit(Authenticated(user)) : emit(Unauthenticated()),
+      (user) {
+        if (user != null) {
+          emit(Authenticated(user));
+          saveFcmToken(); // ignore: unawaited_futures
+        } else {
+          emit(Unauthenticated());
+        }
+      },
     );
   }
 

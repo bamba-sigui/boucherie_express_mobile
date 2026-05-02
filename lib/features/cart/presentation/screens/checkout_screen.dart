@@ -135,10 +135,10 @@ class _CheckoutView extends StatelessWidget {
                 if (checkout.deliveryAddress != null)
                   DeliveryAddressCard(
                     address: checkout.deliveryAddress!,
-                    onEdit: () {
-                      // TODO: Navigate to address management
-                    },
-                  ),
+                    onEdit: () => context.push('/addresses'),
+                  )
+                else
+                  _NoAddressCard(),
 
                 const SizedBox(height: 28),
 
@@ -201,6 +201,78 @@ class _CheckoutView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NO ADDRESS CARD
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _NoAddressCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GestureDetector(
+        onTap: () => context.push('/addresses'),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.cardDark,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: .4),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: .1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.add_location_alt_outlined,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ajouter une adresse de livraison',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Requis pour passer la commande',
+                      style: TextStyle(
+                        color: AppColors.textGrey,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

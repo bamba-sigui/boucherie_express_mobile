@@ -113,9 +113,7 @@ class _PaymentMethodsView extends StatelessWidget {
 
               // ── Section Cartes Bancaires ──
               EmptyCardsWidget(
-                onAdd: () {
-                  // TODO: Navigation vers flow d'ajout carte
-                },
+                onAdd: () => _showComingSoon(context),
               ),
               const SizedBox(height: 32),
             ],
@@ -198,6 +196,53 @@ class _PaymentMethodsView extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showComingSoon(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.cardDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withValues(alpha: .05)),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.credit_card_rounded, color: AppColors.primary, size: 22),
+            SizedBox(width: 10),
+            Text(
+              'Prochainement',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Le paiement par carte bancaire sera disponible dans une prochaine mise à jour.\n\nUtilisez Orange Money, MTN MoMo ou Wave pour payer dès maintenant.',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: .5),
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'OK',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

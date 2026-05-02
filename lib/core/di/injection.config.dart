@@ -48,6 +48,7 @@ import '../../features/cart/domain/repositories/cart_repository.dart' as _i322;
 import '../../features/cart/domain/repositories/checkout_repository.dart'
     as _i29;
 import '../../features/cart/domain/usecases/add_to_cart.dart' as _i868;
+import '../../features/cart/domain/usecases/clear_cart.dart' as _i834;
 import '../../features/cart/domain/usecases/get_cart.dart' as _i912;
 import '../../features/cart/domain/usecases/get_default_address.dart' as _i627;
 import '../../features/cart/domain/usecases/get_payment_methods.dart' as _i484;
@@ -145,10 +146,12 @@ import '../../features/profile/domain/repositories/payment_method_repository.dar
     as _i87;
 import '../../features/profile/domain/repositories/support_repository.dart'
     as _i475;
+import '../../features/profile/domain/usecases/add_address.dart' as _i731;
 import '../../features/profile/domain/usecases/add_payment_method.dart'
     as _i482;
 import '../../features/profile/domain/usecases/delete_address.dart' as _i64;
 import '../../features/profile/domain/usecases/get_addresses.dart' as _i755;
+import '../../features/profile/domain/usecases/update_address.dart' as _i732;
 import '../../features/profile/domain/usecases/get_faqs.dart' as _i186;
 import '../../features/profile/domain/usecases/get_payment_methods.dart'
     as _i24;
@@ -168,6 +171,9 @@ import '../../features/profile/presentation/bloc/personal_info_bloc.dart'
 import '../../features/profile/presentation/bloc/profile_bloc.dart' as _i469;
 import '../../features/profile/presentation/bloc/support_bloc.dart' as _i1040;
 import '../network/api_client.dart' as _i557;
+import '../services/notification_service.dart' as _i2001;
+import '../../features/auth/domain/usecases/save_fcm_token.dart' as _i2002;
+import '../../features/profile/domain/usecases/upload_avatar.dart' as _i2003;
 import 'app_module.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -218,6 +224,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i254.GetSupportContacts(gh<_i475.SupportRepository>()));
     gh.lazySingleton<_i868.AddToCart>(
         () => _i868.AddToCart(gh<_i322.CartRepository>()));
+    gh.lazySingleton<_i834.ClearCart>(
+        () => _i834.ClearCart(gh<_i322.CartRepository>()));
     gh.lazySingleton<_i912.GetCart>(
         () => _i912.GetCart(gh<_i322.CartRepository>()));
     gh.lazySingleton<_i904.RemoveFromCart>(
@@ -258,6 +266,10 @@ extension GetItInjectableX on _i174.GetIt {
               gh<_i59.FirebaseAuth>(),
               gh<_i161.AuthRemoteDataSource>(),
             ));
+    gh.factory<_i731.AddAddress>(
+        () => _i731.AddAddress(gh<_i11.AddressRepository>()));
+    gh.factory<_i732.UpdateAddress>(
+        () => _i732.UpdateAddress(gh<_i11.AddressRepository>()));
     gh.factory<_i64.DeleteAddress>(
         () => _i64.DeleteAddress(gh<_i11.AddressRepository>()));
     gh.factory<_i755.GetAddresses>(
@@ -271,6 +283,7 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i868.AddToCart>(),
           gh<_i904.RemoveFromCart>(),
           gh<_i170.UpdateCartItemQuantity>(),
+          gh<_i834.ClearCart>(),
         ));
     gh.lazySingleton<_i29.CheckoutRepository>(
         () => _i763.CheckoutRepositoryImpl(gh<_i557.ApiClient>()));
@@ -323,6 +336,14 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i623.SignInWithGoogle(gh<_i787.AuthRepository>()));
     gh.lazySingleton<_i215.ResetPassword>(
         () => _i215.ResetPassword(gh<_i787.AuthRepository>()));
+    gh.lazySingleton<_i2001.NotificationService>(
+        () => _i2001.NotificationService());
+    gh.lazySingleton<_i2002.SaveFcmToken>(() => _i2002.SaveFcmToken(
+          gh<_i787.AuthRepository>(),
+          gh<_i2001.NotificationService>(),
+        ));
+    gh.factory<_i2003.UploadAvatar>(
+        () => _i2003.UploadAvatar(gh<_i787.AuthRepository>()));
     gh.lazySingleton<_i212.FavoritesRepository>(() =>
         _i144.FavoritesRepositoryImpl(gh<_i904.FavoritesLocalDataSource>()));
     gh.lazySingleton<_i0.HomeRepository>(
@@ -354,6 +375,8 @@ extension GetItInjectableX on _i174.GetIt {
           getAddresses: gh<_i755.GetAddresses>(),
           setDefaultAddress: gh<_i35.SetDefaultAddress>(),
           deleteAddress: gh<_i64.DeleteAddress>(),
+          addAddress: gh<_i731.AddAddress>(),
+          updateAddress: gh<_i732.UpdateAddress>(),
         ));
     gh.lazySingleton<_i18.GetAllProducts>(
         () => _i18.GetAllProducts(gh<_i168.ProductRepository>()));
@@ -388,10 +411,12 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i497.WatchAuthChanges>(),
           gh<_i623.SignInWithGoogle>(),
           gh<_i215.ResetPassword>(),
+          gh<_i2002.SaveFcmToken>(),
         ));
     gh.factory<_i1030.PersonalInfoBloc>(() => _i1030.PersonalInfoBloc(
           getCurrentUser: gh<_i111.GetCurrentUser>(),
           updateUserProfile: gh<_i901.UpdateUserProfile>(),
+          uploadAvatar: gh<_i2003.UploadAvatar>(),
         ));
     gh.factory<_i856.ProductBloc>(() => _i856.ProductBloc(
           gh<_i18.GetAllProducts>(),
@@ -407,6 +432,7 @@ extension GetItInjectableX on _i174.GetIt {
           createOrder: gh<_i725.CreateOrder>(),
           getUserOrders: gh<_i299.GetUserOrders>(),
           getOrderById: gh<_i43.GetOrderById>(),
+          getCurrentUser: gh<_i111.GetCurrentUser>(),
         ));
     gh.factory<_i539.FilterBloc>(() => _i539.FilterBloc(
           gh<_i814.ApplyFilter>(),
