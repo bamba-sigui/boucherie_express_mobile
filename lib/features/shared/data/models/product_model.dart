@@ -20,19 +20,23 @@ class ProductModel extends Product {
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    final cat = json['category'];
     return ProductModel(
-      id: json['id'] as String,
+      id: json['id'].toString(),
       name: json['name'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String? ?? '',
       price: (json['price'] as num).toDouble(),
       oldPrice: json['oldPrice'] != null
           ? (json['oldPrice'] as num).toDouble()
           : null,
-      images: (json['images'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       videoUrl: json['videoUrl'] as String?,
-      category: (json['category_id'] ?? json['category']) as String,
+      category: cat is Map
+          ? (cat as Map<String, dynamic>)['name'] as String? ?? ''
+          : json['categoryId']?.toString() ?? '',
       preparationOptions:
           (json['preparationOptions'] as List<dynamic>?)
               ?.map((e) => e as String)

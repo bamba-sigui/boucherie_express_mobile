@@ -38,18 +38,16 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
 
       // Chercher l'adresse par défaut, sinon prendre la première
       final defaultAddr = addresses.firstWhere(
-        (a) => a['is_default'] == true,
+        (a) => a['isDefault'] == true,
         orElse: () => addresses.first,
       );
 
       final map = defaultAddr as Map<String, dynamic>;
       return Right(
         DeliveryAddress(
-          id: map['id'] as String,
-          title: map['title'] as String? ?? map['label'] as String? ?? '',
-          detail: map['detail'] as String? ??
-              map['full_address'] as String? ??
-              '',
+          id: map['id'].toString(),
+          title: map['label'] as String? ?? '',
+          detail: map['address'] as String? ?? '',
           city: map['city'] as String? ?? '',
         ),
       );
@@ -66,7 +64,7 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
       final cartItems = checkout.cart.items
           .map(
             (item) => {
-              'product_id': item.product.id,
+              'product_id': int.tryParse(item.product.id) ?? item.product.id,
               'quantity': item.quantity,
               'option': item.preparationOption,
             },
@@ -74,16 +72,17 @@ class CheckoutRepositoryImpl implements CheckoutRepository {
           .toList();
 
       final body = <String, dynamic>{
-        'cart_items': cartItems,
+        'items': cartItems,
         'payment_method': _mapPaymentMethodId(
           checkout.selectedPaymentMethod?.id,
         ),
         if (checkout.deliveryAddress != null)
-          'address_id': checkout.deliveryAddress!.id,
+          'address_id': int.tryParse(checkout.deliveryAddress!.id) ??
+              checkout.deliveryAddress!.id,
       };
 
       final data = await _apiClient.post(ApiConstants.checkout, data: body);
-      final orderId = (data as Map<String, dynamic>)['order_id'] as String;
+      final orderId = (data as Map<String, dynamic>)['id'].toString();
       return Right(orderId);
     } on AppException catch (e) {
       return Left(ServerFailure(e.message));

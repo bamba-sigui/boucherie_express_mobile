@@ -33,14 +33,15 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
   Future<List<Product>> getProducts({String? categoryId}) async {
     final queryParams = <String, dynamic>{};
     if (categoryId != null && categoryId.isNotEmpty && categoryId != 'tout') {
-      queryParams['category'] = categoryId;
+      queryParams['category_id'] = categoryId;
     }
 
     final data = await _apiClient.get(
       ApiConstants.products,
       queryParameters: queryParams.isNotEmpty ? queryParams : null,
     );
-    return (data as List)
+    final list = (data as Map<String, dynamic>)['data'] as List;
+    return list
         .map(
           (json) => ProductModel.fromJson(json as Map<String, dynamic>),
         )
@@ -54,7 +55,7 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
         .map((json) {
           final map = json as Map<String, dynamic>;
           return HomeCategory(
-            id: map['id'] as String,
+            id: map['id'].toString(),
             name: map['name'] as String,
             icon: map['icon'] as String? ?? '',
           );
@@ -83,9 +84,10 @@ class HomeLocalDataSourceImpl implements HomeLocalDataSource {
   Future<List<Product>> searchProducts(String query) async {
     final data = await _apiClient.get(
       ApiConstants.products,
-      queryParameters: {'q': query},
+      queryParameters: {'search': query},
     );
-    return (data as List)
+    final list = (data as Map<String, dynamic>)['data'] as List;
+    return list
         .map(
           (json) => ProductModel.fromJson(json as Map<String, dynamic>),
         )

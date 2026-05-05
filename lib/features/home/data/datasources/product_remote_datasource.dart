@@ -24,7 +24,8 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   Future<List<ProductModel>> getAllProducts() async {
     try {
       final data = await apiClient.get(ApiConstants.products);
-      return (data as List)
+      final list = (data as Map<String, dynamic>)['data'] as List;
+      return list
           .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on AppException {
@@ -39,9 +40,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     try {
       final data = await apiClient.get(
         ApiConstants.products,
-        queryParameters: {'category': categoryId},
+        queryParameters: {'category_id': categoryId},
       );
-      return (data as List)
+      final list = (data as Map<String, dynamic>)['data'] as List;
+      return list
           .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on AppException {
@@ -68,9 +70,10 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     try {
       final data = await apiClient.get(
         ApiConstants.products,
-        queryParameters: {'q': query},
+        queryParameters: {'search': query},
       );
-      return (data as List)
+      final list = (data as Map<String, dynamic>)['data'] as List;
+      return list
           .map((json) => ProductModel.fromJson(json as Map<String, dynamic>))
           .toList();
     } on AppException {

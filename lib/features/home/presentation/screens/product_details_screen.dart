@@ -46,7 +46,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _selectedOption = widget.product.preparationOptions.first;
+    _selectedOption = widget.product.preparationOptions.isNotEmpty
+        ? widget.product.preparationOptions.first
+        : '';
     _initNotifAnimations();
   }
 

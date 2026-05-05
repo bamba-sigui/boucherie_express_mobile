@@ -39,8 +39,8 @@ class OrderItem extends Equatable {
 class Order extends Equatable {
   final String id;
   final String userId;
-  final String userName;
-  final String userPhone;
+  final String? userName;
+  final String? userPhone;
   final List<OrderItem> items;
   final double totalPrice; // items subtotal
   final double deliveryFee;
@@ -54,9 +54,9 @@ class Order extends Equatable {
 
   const Order({
     required this.id,
-    required this.userId,
-    required this.userName,
-    required this.userPhone,
+    this.userId = '',
+    this.userName,
+    this.userPhone,
     required this.items,
     required this.totalPrice,
     required this.deliveryFee,

@@ -4,9 +4,9 @@ import 'package:boucherie_express/features/orders/domain/entities/order.dart';
 class OrderModel extends Order {
   const OrderModel({
     required super.id,
-    required super.userId,
-    required super.userName,
-    required super.userPhone,
+    super.userId,
+    super.userName,
+    super.userPhone,
     required super.items,
     required super.totalPrice,
     required super.deliveryFee,
@@ -21,18 +21,18 @@ class OrderModel extends Order {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      userName: json['userName'] as String? ?? 'Utilisateur',
-      userPhone: json['userPhone'] as String? ?? '',
+      id: json['id'].toString(),
+      userId: json['userId']?.toString() ?? '',
+      userName: json['userName'] as String?,
+      userPhone: json['userPhone'] as String?,
       items: (json['items'] as List<dynamic>)
           .map(
             (item) => OrderItem(
-              productId: item['productId'] as String,
+              productId: item['productId'].toString(),
               productName: item['productName'] as String,
               price: (item['price'] as num).toDouble(),
               quantity: item['quantity'] as int,
-              option: item['option'] as String,
+              option: item['option'] as String? ?? '',
               imageUrl: item['imageUrl'] as String?,
             ),
           )
@@ -42,13 +42,24 @@ class OrderModel extends Order {
       totalAmount: (json['totalAmount'] as num).toDouble(),
       deliveryAddress: json['deliveryAddress'] as String,
       status: OrderStatus.values.byName(json['status'] as String),
-      paymentMethod: PaymentMethod.values.byName(
-        json['paymentMethod'] as String,
+      paymentMethod: _parsePaymentMethod(
+        json['paymentMethod'] as String? ?? 'cash',
       ),
       paymentStatus: json['paymentStatus'] as String,
       orderedAt: DateTime.parse(json['orderedAt'] as String),
       note: json['note'] as String?,
     );
+  }
+
+  static PaymentMethod _parsePaymentMethod(String value) {
+    switch (value) {
+      case 'orange_money':
+        return PaymentMethod.orangeMoney;
+      case 'mtn_momo':
+        return PaymentMethod.moovMoney;
+      default:
+        return PaymentMethod.values.byName(value);
+    }
   }
 
   Map<String, dynamic> toJson() {

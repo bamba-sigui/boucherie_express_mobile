@@ -64,11 +64,12 @@ class AddressRepositoryImpl implements AddressRepository {
       await _apiClient.post(
         ApiConstants.addresses,
         data: {
-          'title': address.label,
-          'detail': address.fullAddress,
+          'label': address.label,
+          'address': address.fullAddress,
           'city': _extractCity(address.fullAddress),
-          'type': _addressTypeToString(address.type),
           'is_default': address.isDefault,
+          if (address.latitude != null) 'latitude': address.latitude,
+          if (address.longitude != null) 'longitude': address.longitude,
         },
       );
       return getAddresses();
@@ -85,11 +86,12 @@ class AddressRepositoryImpl implements AddressRepository {
       await _apiClient.put(
         ApiConstants.address(address.id),
         data: {
-          'title': address.label,
-          'detail': address.fullAddress,
+          'label': address.label,
+          'address': address.fullAddress,
           'city': _extractCity(address.fullAddress),
-          'type': _addressTypeToString(address.type),
           'is_default': address.isDefault,
+          if (address.latitude != null) 'latitude': address.latitude,
+          if (address.longitude != null) 'longitude': address.longitude,
         },
       );
       return getAddresses();
@@ -104,11 +106,13 @@ class AddressRepositoryImpl implements AddressRepository {
     return data.map((json) {
       final map = json as Map<String, dynamic>;
       return Address(
-        id: map['id'] as String,
-        label: map['title'] as String? ?? '',
-        fullAddress: map['detail'] as String? ?? '',
-        isDefault: map['is_default'] as bool? ?? false,
+        id: map['id'].toString(),
+        label: map['label'] as String? ?? '',
+        fullAddress: map['address'] as String? ?? '',
+        isDefault: map['isDefault'] as bool? ?? false,
         type: _parseAddressType(map['type'] as String?),
+        latitude: (map['latitude'] as num?)?.toDouble(),
+        longitude: (map['longitude'] as num?)?.toDouble(),
       );
     }).toList();
   }
@@ -121,17 +125,6 @@ class AddressRepositoryImpl implements AddressRepository {
         return AddressType.work;
       default:
         return AddressType.other;
-    }
-  }
-
-  String _addressTypeToString(AddressType type) {
-    switch (type) {
-      case AddressType.home:
-        return 'home';
-      case AddressType.work:
-        return 'work';
-      case AddressType.other:
-        return 'other';
     }
   }
 

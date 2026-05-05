@@ -61,36 +61,48 @@ class _ProductCarouselState extends State<ProductCarousel> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // ── Image Carousel ──
-          PageView.builder(
-            controller: _pageController,
-            itemCount: widget.images.length,
-            onPageChanged: (i) => setState(() => _currentIndex = i),
-            itemBuilder: (context, index) {
-              return CachedNetworkImage(
-                imageUrl: widget.images[index],
-                fit: BoxFit.cover,
-                width: double.infinity,
-                placeholder: (_, __) => Container(
-                  color: AppColors.backgroundDark,
-                  child: const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                      strokeWidth: 2,
+          // ── Image Carousel (or placeholder when none) ──
+          if (widget.images.isEmpty)
+            Container(
+              color: AppColors.cardDark,
+              child: const Center(
+                child: Icon(
+                  Icons.image_not_supported_outlined,
+                  color: AppColors.textGrey,
+                  size: 64,
+                ),
+              ),
+            )
+          else
+            PageView.builder(
+              controller: _pageController,
+              itemCount: widget.images.length,
+              onPageChanged: (i) => setState(() => _currentIndex = i),
+              itemBuilder: (context, index) {
+                return CachedNetworkImage(
+                  imageUrl: widget.images[index],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  placeholder: (_, __) => Container(
+                    color: AppColors.backgroundDark,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                        strokeWidth: 2,
+                      ),
                     ),
                   ),
-                ),
-                errorWidget: (_, __, ___) => Container(
-                  color: AppColors.backgroundDark,
-                  child: const Icon(
-                    Icons.image_not_supported_outlined,
-                    color: AppColors.textGrey,
-                    size: 48,
+                  errorWidget: (_, __, ___) => Container(
+                    color: AppColors.backgroundDark,
+                    child: const Icon(
+                      Icons.image_not_supported_outlined,
+                      color: AppColors.textGrey,
+                      size: 48,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
 
           // ── Gradient overlay bottom ──
           Positioned(

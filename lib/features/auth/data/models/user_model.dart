@@ -20,7 +20,7 @@ class UserModel extends User {
       phone: json['phone'] as String?,
       addresses:
           (json['addresses'] as List<dynamic>?)
-              ?.map((e) => e as String)
+              ?.map((e) => (e as Map<String, dynamic>)['id'].toString())
               .toList() ??
           [],
       photoUrl: json['photoUrl'] as String?,

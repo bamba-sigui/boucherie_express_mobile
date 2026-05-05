@@ -115,7 +115,9 @@ class _HomeProductCardState extends State<HomeProductCard> {
                           product: widget.product,
                           quantity: 1,
                           preparationOption:
-                              widget.product.preparationOptions.first,
+                              widget.product.preparationOptions.isNotEmpty
+                                  ? widget.product.preparationOptions.first
+                                  : '',
                         ),
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -178,42 +180,57 @@ class _HomeProductCardState extends State<HomeProductCard> {
       height: 180,
       child: Stack(
         children: [
-          // PageView images
-          PageView.builder(
-            controller: _pageController,
-            itemCount: images.length,
-            onPageChanged: (index) {
-              setState(() => _currentImageIndex = index);
-            },
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () => context.push('/details', extra: widget.product),
-                child: CachedNetworkImage(
-                  imageUrl: images[index],
-                  width: double.infinity,
-                  height: 180,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: AppColors.backgroundDark,
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                        strokeWidth: 2,
+          // PageView images (or placeholder when none)
+          if (images.isEmpty)
+            GestureDetector(
+              onTap: () => context.push('/details', extra: widget.product),
+              child: Container(
+                width: double.infinity,
+                height: 180,
+                color: AppColors.backgroundDark,
+                child: const Icon(
+                  Icons.image_not_supported_outlined,
+                  color: AppColors.textGrey,
+                  size: 48,
+                ),
+              ),
+            )
+          else
+            PageView.builder(
+              controller: _pageController,
+              itemCount: images.length,
+              onPageChanged: (index) {
+                setState(() => _currentImageIndex = index);
+              },
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => context.push('/details', extra: widget.product),
+                  child: CachedNetworkImage(
+                    imageUrl: images[index],
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      color: AppColors.backgroundDark,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      color: AppColors.backgroundDark,
+                      child: const Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.textGrey,
+                        size: 48,
                       ),
                     ),
                   ),
-                  errorWidget: (_, __, ___) => Container(
-                    color: AppColors.backgroundDark,
-                    child: const Icon(
-                      Icons.image_not_supported_outlined,
-                      color: AppColors.textGrey,
-                      size: 48,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
 
           // Indicateurs de page
           if (images.length > 1)

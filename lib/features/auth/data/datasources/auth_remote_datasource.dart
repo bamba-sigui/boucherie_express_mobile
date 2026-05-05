@@ -336,7 +336,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> saveFcmToken(String token) async {
     try {
-      await apiClient.post('/profile/fcm-token', data: {'token': token});
+      await apiClient.post('/profile/fcm-token', data: {'fcm_token': token});
     } catch (_) {
       // Non-bloquant
     }
@@ -348,7 +348,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'avatar': await MultipartFile.fromFile(filePath),
     });
     final data = await apiClient.post('/users/me/avatar', data: formData);
-    return (data as Map<String, dynamic>)['photo_url'] as String;
+    return (data as Map<String, dynamic>)['photoUrl'] as String;
   }
 
   String _getPhoneErrorMessage(String code) {

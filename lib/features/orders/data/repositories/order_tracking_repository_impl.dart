@@ -45,8 +45,8 @@ class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
     final steps = (data['steps'] as List?)?.map((s) {
           final map = s as Map<String, dynamic>;
           final completed = map['completed'] as bool? ?? false;
-          final completedAt = map['completed_at'] != null
-              ? DateTime.tryParse(map['completed_at'] as String)
+          final completedAt = map['completedAt'] != null
+              ? DateTime.tryParse(map['completedAt'] as String)
               : null;
 
           // Determine status based on completion
@@ -75,12 +75,12 @@ class OrderTrackingRepositoryImpl implements OrderTrackingRepository {
     if (data['courier'] != null) {
       final c = data['courier'] as Map<String, dynamic>;
       courier = Courier(
-        id: c['id'] as String? ?? '',
+        id: c['id']?.toString() ?? '',
         name: c['name'] as String? ?? '',
         rating: (c['rating'] as num?)?.toDouble() ?? 0,
         vehicle: c['vehicle'] as String? ?? '',
         phone: c['phone'] as String? ?? '',
-        photoUrl: c['photo_url'] as String? ?? '',
+        photoUrl: c['photoUrl'] as String? ?? '',
       );
     }
 
